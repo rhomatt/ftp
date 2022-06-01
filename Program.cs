@@ -1,53 +1,76 @@
 ﻿using System;
 using System.Net.Sockets;
+using System.Text;
+using System.Threading;
 
 namespace FtpClient {
     class Client {
 
         TcpClient connection;
+        NetworkStream stream;
+        bool running = true;
 
         public Client(string address) {
             this.connection = new TcpClient(address, 21);
+            this.stream = this.connection.GetStream();
+        }
+
+        public void pwd() {
+            this.stream.Write(Encoding.ASCII.GetBytes("PWD\n"));
+        }
+
+        private async Task flusher() {
+            while(true) {
+                byte[] buffer = new byte[256];
+                await this.stream.ReadAsync(buffer);
+
+                string line = Encoding.ASCII.GetString(buffer);
+                Console.Write(line);
+            }
+        }
+
+        public async Task run() {
+            await Task.Run(flusher);
         }
 
         /*
          * Parses a command and performs some logic.
          *
-         * return false if quitting, true otherwise
+         * sets running to false if quitting
          */
-        public bool ParseCmd(string cmd) {
+        public void ParseCmd(string cmd) {
             switch(cmd) {
                 case "a":
                 case "ascii":
-                    return true;
+                    break;
                 case "b":
                 case "binary":
-                    return true;
+                    break;
                 case "cd":
-                    return true;
+                    break;
                 case "cdup":
-                    return true;
+                    break;
                 case "debug":
-                    return true;
+                    break;
                 case "ls":
                 case "dir":
-                    return true;
+                    break;
                 case "get":
-                    return true;
+                    break;
                 case "?":
                 case "h":
                 case "help":
-                    return true;
+                    break;
                 case "passive":
-                    return true;
+                    break;
                 case "pwd":
-                    return true;
+                    this.pwd();
+                    break;
                 case "q":
                 case "quit":
-                    return false;
+                    this.running = false;
+                    break;
             }
-
-            return true;
         }
 
         public static void Main(string[] args) {
@@ -57,12 +80,12 @@ namespace FtpClient {
             }
 
             string address = args[0];
-            bool cont = true;
 
             Client client = new Client(address);
+            client.run();
 
-            while(cont) {
-                cont = client.ParseCmd(Console.ReadLine());
+            while(client.running) {
+                client.ParseCmd(Console.ReadLine());
             }
         }
     }
