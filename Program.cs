@@ -28,6 +28,31 @@ namespace FtpClient {
             this.stream.Write(Encoding.ASCII.GetBytes(sb.ToString()));
         }
 
+        private void PrintHelp() {
+            string[] help_lines = {
+                "Help:",
+                "?              display this message",
+                "a(scii)        set ASCII transfer type",
+                "b(inary)       set binary transfer type",
+                "cd             change working directory",
+                "cdup           same as cd ..",
+                "debug          toggle debug mode",
+                "dir            list contents of directory. If no arg given, assume cwd",
+                "get <path>     get a remote file",
+                "h(elp)         same as ?",
+                "login <user>   logs in as <user>. prompts for a password",
+                "logout         closes this client gracefully",
+                "ls             same as dir",
+                "passive        toggle active/passive mode",
+                "pwd            prints working directory",
+                "q(uit)         same as logout",
+                "user <user>    same as login"
+            };
+
+            foreach(string line in help_lines)
+                Console.WriteLine(line);
+        }
+
         private async Task Read() {
             while(running) {
                 try {
@@ -56,49 +81,53 @@ namespace FtpClient {
             string[] args = line.Split(' ');
             string cmd = args[0];
 
-            switch(cmd) {
-                case "a":
-                case "ascii":
-                    break;
-                case "b":
-                case "binary":
-                    break;
-                case "cd":
-                    break;
-                case "cdup":
-                    break;
-                case "debug":
-                    break;
-                case "ls":
-                case "dir":
-                    break;
-                case "get":
-                    break;
-                case "?":
-                case "h":
-                case "help":
-                    break;
-                case "passive":
-                    break;
-                case "pwd":
-                    FTPCmd("PWD");
-                    break;
-                case "q":
-                case "quit":
-                case "logout":
-                    return false;
-                case "user":
-                    if(args.Length < 2) {
-                        Console.WriteLine("usage: user USERNAME");
+            try {
+                switch(cmd) {
+                    case "a":
+                    case "ascii":
                         break;
-                    }
+                    case "b":
+                    case "binary":
+                        break;
+                    case "cd":
+                        break;
+                    case "cdup":
+                        break;
+                    case "debug":
+                        break;
+                    case "ls":
+                    case "dir":
+                        break;
+                    case "get":
+                        break;
+                    case "?":
+                    case "h":
+                    case "help":
+                        PrintHelp();
+                        break;
+                    case "passive":
+                        break;
+                    case "pwd":
+                        FTPCmd("PWD");
+                        break;
+                    case "q":
+                    case "quit":
+                    case "logout":
+                        FTPCmd("QUIT");
+                        return false;
+                    case "user":
+                    case "login":
+                        FTPCmd("USER", args[1]);
 
-
-                    FTPCmd("USER", args[1]);
-                    break;
-                default:
-                    Console.Error.WriteLine("Invalid command");
-                    break;
+                        string password = Console.ReadLine();
+                        FTPCmd("PASS", password);
+                        break;
+                    default:
+                        Console.Error.WriteLine("Invalid command");
+                        break;
+                }
+            } catch (Exception e) {
+                Console.Error.WriteLine("Invalid use of {0}", cmd);
             }
 
             return true;
