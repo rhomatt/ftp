@@ -78,7 +78,7 @@ namespace FtpClient {
             if(line.Length <= 0)
                 return true;
 
-            string[] args = line.Split(' ');
+            string[] args = line.Split(' ', StringSplitOptions.TrimEntries);
             string cmd = args[0];
 
             try {
@@ -97,6 +97,9 @@ namespace FtpClient {
                         break;
                     case "ls":
                     case "dir":
+                        string target = args.Length == 1 ? "" : line.Split(' ', 2)[1];
+
+                        FTPCmd("LIST", target);
                         break;
                     case "get":
                         break;
