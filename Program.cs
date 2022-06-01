@@ -1,14 +1,21 @@
 ﻿using System;
+using System.Net.Sockets;
 
-namespace Project {
+namespace FtpClient {
     class Client {
+
+        TcpClient connection;
+
+        public Client(string address) {
+            this.connection = new TcpClient(address, 21);
+        }
 
         /*
          * Parses a command and performs some logic.
          *
          * return false if quitting, true otherwise
          */
-        public static bool ParseCmd(string cmd) {
+        public bool ParseCmd(string cmd) {
             switch(cmd) {
                 case "a":
                 case "ascii":
@@ -44,10 +51,18 @@ namespace Project {
         }
 
         public static void Main(string[] args) {
+            if(args.Length < 1) {
+                Console.WriteLine("usage: ftp target");
+                return;
+            }
+
+            string address = args[0];
             bool cont = true;
 
+            Client client = new Client(address);
+
             while(cont) {
-                cont = ParseCmd(Console.ReadLine());
+                cont = client.ParseCmd(Console.ReadLine());
             }
         }
     }
