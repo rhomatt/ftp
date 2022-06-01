@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace Project {
-    class Program {
+    class Client {
 
         /*
          * Parses a command and performs some logic.
@@ -10,8 +10,10 @@ namespace Project {
          */
         public static bool ParseCmd(string cmd) {
             switch(cmd) {
+                case "a":
                 case "ascii":
                     return true;
+                case "b":
                 case "binary":
                     return true;
                 case "cd":
@@ -20,16 +22,20 @@ namespace Project {
                     return true;
                 case "debug":
                     return true;
+                case "ls":
                 case "dir":
                     return true;
                 case "get":
                     return true;
+                case "?":
+                case "h":
                 case "help":
                     return true;
                 case "passive":
                     return true;
                 case "pwd":
                     return true;
+                case "q":
                 case "quit":
                     return false;
             }
@@ -38,7 +44,11 @@ namespace Project {
         }
 
         public static void Main(string[] args) {
+            bool cont = true;
 
+            while(cont) {
+                cont = ParseCmd(Console.ReadLine());
+            }
         }
     }
 }
