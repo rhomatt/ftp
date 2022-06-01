@@ -15,65 +15,81 @@ namespace FtpClient {
             this.stream = this.connection.GetStream();
         }
 
-        public void pwd() {
+        private void pwd() {
             this.stream.Write(Encoding.ASCII.GetBytes("PWD\n"));
         }
 
-        private async Task flusher() {
-            while(true) {
-                byte[] buffer = new byte[256];
-                await this.stream.ReadAsync(buffer);
+        private async Task Read() {
+            while(running) {
+                try {
+                    byte[] buffer = new byte[256];
+                    await this.stream.ReadAsync(buffer, 0, buffer.Length);
 
-                string line = Encoding.ASCII.GetString(buffer);
-                Console.Write(line);
+                    string line = Encoding.ASCII.GetString(buffer);
+                    Console.Write(line);
+                } catch (IOException e) {
+                    // network stream was closed. we are done
+                    return;
+                } catch(Exception e) {
+                    Console.Error.WriteLine("An error occured while trying to read data: {0}", e.Message);
+                }
             }
-        }
-
-        public async Task run() {
-            await Task.Run(flusher);
         }
 
         /*
          * Parses a command and performs some logic.
          *
-         * sets running to false if quitting
-         */
-        public void ParseCmd(string cmd) {
+         * return false if quitting, true otherwise */
+        private bool ParseCmd(string cmd) {
             switch(cmd) {
                 case "a":
                 case "ascii":
-                    break;
+                    return true;
                 case "b":
                 case "binary":
-                    break;
+                    return true;
                 case "cd":
-                    break;
+                    return true;
                 case "cdup":
-                    break;
+                    return true;
                 case "debug":
-                    break;
+                    return true;
                 case "ls":
                 case "dir":
-                    break;
+                    return true;
                 case "get":
-                    break;
+                    return true;
                 case "?":
                 case "h":
                 case "help":
-                    break;
+                    return true;
                 case "passive":
-                    break;
+                    return true;
                 case "pwd":
                     this.pwd();
-                    break;
+                    return true;
+                case "":
                 case "q":
                 case "quit":
-                    this.running = false;
-                    break;
+                case "logout":
+                    return false;
+                default:
+                    Console.Error.WriteLine("Invalid command");
+                    return true;
             }
         }
 
-        public static void Main(string[] args) {
+        public async Task Run() {
+            Task readTask = Task.Run(this.Read);
+            while(ParseCmd(Console.ReadLine()));
+
+            this.running = false;
+            this.connection.Close();
+
+            await readTask;
+        }
+
+        public static async Task Main(string[] args) {
             if(args.Length < 1) {
                 Console.WriteLine("usage: ftp target");
                 return;
@@ -82,11 +98,8 @@ namespace FtpClient {
             string address = args[0];
 
             Client client = new Client(address);
-            client.run();
 
-            while(client.running) {
-                client.ParseCmd(Console.ReadLine());
-            }
+            await client.Run();
         }
     }
 }
