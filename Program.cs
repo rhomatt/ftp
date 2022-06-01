@@ -15,13 +15,17 @@ namespace FtpClient {
             this.stream = this.connection.GetStream();
         }
 
-        private void pwd() {
-            this.stream.Write(Encoding.ASCII.GetBytes("PWD\n"));
-        }
+        private void FTPCmd(string cmd, params string[] args) {
+            StringBuilder sb = new();
 
-        private void user(string username) {
-            string sendString = "USER " + username + '\n';
-            this.stream.Write(Encoding.ASCII.GetBytes(sendString));
+            sb.Append(cmd);
+            foreach(string arg in args) {
+                sb.Append(' ');
+                sb.Append(arg);
+            }
+            sb.Append('\n');
+
+            this.stream.Write(Encoding.ASCII.GetBytes(sb.ToString()));
         }
 
         private async Task Read() {
@@ -77,7 +81,7 @@ namespace FtpClient {
                 case "passive":
                     break;
                 case "pwd":
-                    this.pwd();
+                    FTPCmd("PWD");
                     break;
                 case "q":
                 case "quit":
@@ -89,7 +93,8 @@ namespace FtpClient {
                         break;
                     }
 
-                    this.user(args[1]);
+
+                    FTPCmd("USER", args[1]);
                     break;
                 default:
                     Console.Error.WriteLine("Invalid command");
