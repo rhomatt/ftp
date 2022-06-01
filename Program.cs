@@ -19,6 +19,11 @@ namespace FtpClient {
             this.stream.Write(Encoding.ASCII.GetBytes("PWD\n"));
         }
 
+        private void user(string username) {
+            string sendString = "USER " + username + '\n';
+            this.stream.Write(Encoding.ASCII.GetBytes(sendString));
+        }
+
         private async Task Read() {
             while(running) {
                 try {
@@ -40,43 +45,58 @@ namespace FtpClient {
          * Parses a command and performs some logic.
          *
          * return false if quitting, true otherwise */
-        private bool ParseCmd(string cmd) {
+        private bool ParseCmd(string line) {
+            if(line.Length <= 0)
+                return true;
+
+            string[] args = line.Split(' ');
+            string cmd = args[0];
+
             switch(cmd) {
                 case "a":
                 case "ascii":
-                    return true;
+                    break;
                 case "b":
                 case "binary":
-                    return true;
+                    break;
                 case "cd":
-                    return true;
+                    break;
                 case "cdup":
-                    return true;
+                    break;
                 case "debug":
-                    return true;
+                    break;
                 case "ls":
                 case "dir":
-                    return true;
+                    break;
                 case "get":
-                    return true;
+                    break;
                 case "?":
                 case "h":
                 case "help":
-                    return true;
+                    break;
                 case "passive":
-                    return true;
+                    break;
                 case "pwd":
                     this.pwd();
-                    return true;
-                case "":
+                    break;
                 case "q":
                 case "quit":
                 case "logout":
                     return false;
+                case "user":
+                    if(args.Length < 2) {
+                        Console.WriteLine("usage: user USERNAME");
+                        break;
+                    }
+
+                    this.user(args[1]);
+                    break;
                 default:
                     Console.Error.WriteLine("Invalid command");
-                    return true;
+                    break;
             }
+
+            return true;
         }
 
         public async Task Run() {
