@@ -9,10 +9,12 @@ namespace FtpClient {
         TcpClient connection;
         NetworkStream stream;
         bool running = true;
+        bool passive = false; // start in active mode
 
-        public Client(string address) {
-            this.connection = new TcpClient(address, 21);
+        public Client(string address, int port) {
+            this.connection = new TcpClient(address, port);
             this.stream = this.connection.GetStream();
+            Console.WriteLine(this.connection.Client.ToString());
         }
 
         private void FTPCmd(string cmd, params string[] args) {
@@ -153,8 +155,9 @@ namespace FtpClient {
             }
 
             string address = args[0];
+            int port = args.Length > 1 ? Int32.Parse(args[1]) : 21;
 
-            Client client = new Client(address);
+            Client client = new Client(address, port);
 
             await client.Run();
         }
