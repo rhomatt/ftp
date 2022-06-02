@@ -14,7 +14,8 @@ namespace FtpClient {
         public Client(string address, int port) {
             this.connection = new TcpClient(address, port);
             this.stream = this.connection.GetStream();
-            Console.WriteLine(this.connection.Client.ToString());
+
+            this.Read(); // read the initial help message
         }
 
         private void FTPCmd(string cmd, params string[] args) {
@@ -28,6 +29,7 @@ namespace FtpClient {
             sb.Append('\n');
 
             this.stream.Write(Encoding.ASCII.GetBytes(sb.ToString()));
+            this.Read();
         }
 
         private void PrintHelp() {
@@ -55,21 +57,14 @@ namespace FtpClient {
                 Console.WriteLine(line);
         }
 
-        private async Task Read() {
-            while(running) {
-                try {
-                    byte[] buffer = new byte[256];
-                    await this.stream.ReadAsync(buffer, 0, buffer.Length);
+        private void Read() {
+            do {
+                byte[] buffer = new byte[256];
+                this.stream.Read(buffer, 0, buffer.Length);
 
-                    string line = Encoding.ASCII.GetString(buffer);
-                    Console.Write(line);
-                } catch (IOException e) {
-                    // network stream was closed. we are done
-                    return;
-                } catch(Exception e) {
-                    Console.Error.WriteLine("An error occured while trying to read data: {0}", e.Message);
-                }
-            }
+                string line = Encoding.ASCII.GetString(buffer);
+                Console.Write(line);
+            } while (this.stream.DataAvailable);
         }
 
         /*
@@ -109,7 +104,7 @@ namespace FtpClient {
                     case "h":
                     case "help":
                         PrintHelp();
-                        break;
+                        return true;
                     case "passive":
                         break;
                     case "pwd":
@@ -123,13 +118,12 @@ namespace FtpClient {
                     case "user":
                     case "login":
                         FTPCmd("USER", args[1]);
-
                         string password = Console.ReadLine();
                         FTPCmd("PASS", password);
                         break;
                     default:
                         Console.Error.WriteLine("Invalid command");
-                        break;
+                        return true;
                 }
             } catch (Exception e) {
                 Console.Error.WriteLine("Invalid use of {0}", cmd);
@@ -138,17 +132,14 @@ namespace FtpClient {
             return true;
         }
 
-        public async Task Run() {
-            Task readTask = Task.Run(this.Read);
+        public void Run() {
             while(ParseCmd(Console.ReadLine()));
 
             this.running = false;
             this.connection.Close();
-
-            await readTask;
         }
 
-        public static async Task Main(string[] args) {
+        public static void Main(string[] args) {
             if(args.Length < 1) {
                 Console.WriteLine("usage: ftp target");
                 return;
@@ -159,7 +150,7 @@ namespace FtpClient {
 
             Client client = new Client(address, port);
 
-            await client.Run();
+            client.Run();
         }
     }
 }
