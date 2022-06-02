@@ -9,8 +9,8 @@ namespace FtpClient {
 
 		TcpClient connection;
 		NetworkStream stream;
-		bool running = true;
-		bool passive = false; // start in active mode
+		bool binary = false; // false: ascii, true: binary
+		bool passive = false; // false: active, true: passive
 		IPAddress address;
 
 		public Client(string address, int port) {
@@ -23,10 +23,10 @@ namespace FtpClient {
 			this.connection.Connect(this.address, port);
 			this.stream = this.connection.GetStream();
 
-			this.Read(); // read the initial help message
+			this.Read(this.stream); // read the initial help message
 		}
 
-		private void FTPCmd(string cmd, bool read, params string[] args) {
+		private void FTPCmd(string cmd, params string[] args) {
 			StringBuilder sb = new StringBuilder();
 
 			sb.Append(cmd);
@@ -37,8 +37,7 @@ namespace FtpClient {
 			sb.Append("\r\n");
 
 			this.stream.Write(Encoding.ASCII.GetBytes(sb.ToString()));
-			if(read)
-				this.Read();
+			this.Read(this.stream);
 		}
 
 		private void PrintHelp() {
@@ -97,18 +96,18 @@ namespace FtpClient {
 
 			Console.WriteLine("sending PORT {0}", arg);
 
-			FTPCmd("PORT", true, arg);
+			FTPCmd("PORT", arg);
 			return listener;
 		}
 
-		private void Read() {
+		private void Read(NetworkStream stream) {
 			do {
 				byte[] buffer = new byte[256];
-				this.stream.Read(buffer, 0, buffer.Length);
+				stream.Read(buffer, 0, buffer.Length);
 
 				string line = Encoding.ASCII.GetString(buffer);
 				Console.Write(line);
-			} while (this.stream.DataAvailable);
+			} while (stream.DataAvailable);
 		}
 
 		/*
@@ -122,6 +121,7 @@ namespace FtpClient {
 			string[] args = line.Split(' ', 2);
 			string cmd = args[0];
 
+			TcpClient dataConncetion = null;
 			try {
 				switch(cmd) {
 					case "a":
@@ -142,17 +142,10 @@ namespace FtpClient {
 						string target = args.Length == 1 ? "" : line.Split(' ', 2)[1];
 
 						Console.WriteLine("listing...");
-						FTPCmd("LIST", true, target);
-						TcpClient dataConncetion = listener.AcceptTcpClient();
-						NetworkStream stream = dataConncetion.GetStream();
-
-						do {
-							byte[] buffer = new byte[256];
-							stream.Read(buffer, 0, buffer.Length);
-
-							string aline = Encoding.ASCII.GetString(buffer);
-							Console.Write(aline);
-						} while (stream.DataAvailable);
+						FTPCmd("LIST", target);
+						dataConncetion = listener.AcceptTcpClient();
+						this.Read(dataConncetion.GetStream());
+						this.Read(this.stream);
 
 						break;
 					case "get":
@@ -165,25 +158,28 @@ namespace FtpClient {
 					case "passive":
 						break;
 					case "pwd":
-						FTPCmd("PWD", true);
+						FTPCmd("PWD");
 						break;
 					case "q":
 					case "quit":
 					case "logout":
-						FTPCmd("QUIT", true);
+						FTPCmd("QUIT");
 						return false;
 					case "user":
 					case "login":
-						FTPCmd("USER", true, args[1]);
+						FTPCmd("USER", args[1]);
 						string password = Console.ReadLine();
-						FTPCmd("PASS", true, password);
+						FTPCmd("PASS", password);
 						break;
 					default:
 						Console.Error.WriteLine("Invalid command");
 						return true;
 				}
-			} catch (Exception e) {
+			} catch (Exception) {
 				Console.Error.WriteLine("Invalid use of {0}", cmd);
+			} finally {
+				if(dataConncetion != null)
+					dataConncetion.Close();
 			}
 
 			return true;
@@ -192,7 +188,6 @@ namespace FtpClient {
 		public void Run() {
 			while(ParseCmd(Console.ReadLine()));
 
-			this.running = false;
 			this.connection.Close();
 		}
 
