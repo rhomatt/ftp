@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -57,6 +58,39 @@ namespace FtpClient {
                 Console.WriteLine(line);
         }
 
+        // returns local ipv4 address if usev6 is false. else returns local ipv6 address
+        private IPAddress getLocalIP(bool usev6) {
+            IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (IPAddress address in host.AddressList) {
+                ProtocolFamily ipType = usev6 ? 
+                    ProtocolFamily.InterNetworkV6 : ProtocolFamily.InterNetwork;
+
+                if(address.AddressFamily.ToString() == ipType.ToString())
+                    return address;
+            }
+
+            return null;
+        }
+
+        private void port() {
+            IPAddress localIP = this.getLocalIP(false);
+            Console.WriteLine(localIP.ToString());
+
+            string arg = localIP.ToString().Replace('.', ',');
+            Random rand = new();
+            int portNumber = rand.Next(1025, 65535);
+            //TODO actually construct some random port numbers
+            int p1 = 30;
+            int p2 = 10;
+
+            arg += ',' + p1.ToString();
+            arg += ',' + p2.ToString();
+
+            Console.WriteLine("sending PORT {0}", arg);
+
+            FTPCmd("PORT", arg);
+        }
+
         private void Read() {
             do {
                 byte[] buffer = new byte[256];
@@ -94,8 +128,10 @@ namespace FtpClient {
                         break;
                     case "ls":
                     case "dir":
+                        port();
                         string target = args.Length == 1 ? "" : line.Split(' ', 2)[1];
 
+                        Console.WriteLine("listing...");
                         FTPCmd("LIST", target);
                         break;
                     case "get":
