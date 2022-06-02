@@ -34,7 +34,7 @@ namespace FtpClient {
 				sb.Append(' ');
 				sb.Append(arg);
 			}
-			sb.Append('\n');
+			sb.Append("\r\n");
 
 			this.stream.Write(Encoding.ASCII.GetBytes(sb.ToString()));
 			if(read)
@@ -80,12 +80,12 @@ namespace FtpClient {
 			return null;
 		}
 
-		private void port() {
+		private TcpListener port() {
 			IPAddress localIP = this.getLocalIP(false);
 			Console.WriteLine(localIP.ToString());
 
 			string arg = localIP.ToString().Replace('.', ',');
-			TcpListener listener = new TcpListener(IPAddress.Loopback, 0);
+			TcpListener listener = new TcpListener(IPAddress.Any, 0);
 			listener.Start();
 			int port = ((IPEndPoint)listener.LocalEndpoint).Port;
 			Console.WriteLine("port: {0}", port);
@@ -97,18 +97,8 @@ namespace FtpClient {
 
 			Console.WriteLine("sending PORT {0}", arg);
 
-			FTPCmd("PORT", false, arg);
-
-			TcpClient dataConnection = listener.AcceptTcpClient();
-			NetworkStream stream = dataConnection.GetStream();
-
-			do {
-				byte[] buffer = new byte[256];
-				stream.Read(buffer, 0, buffer.Length);
-
-				string line = Encoding.ASCII.GetString(buffer);
-				Console.Write(line);
-			} while (stream.DataAvailable);
+			FTPCmd("PORT", true, arg);
+			return listener;
 		}
 
 		private void Read() {
@@ -148,11 +138,22 @@ namespace FtpClient {
 						break;
 					case "ls":
 					case "dir":
-						port();
+						TcpListener listener = port();
 						string target = args.Length == 1 ? "" : line.Split(' ', 2)[1];
 
 						Console.WriteLine("listing...");
 						FTPCmd("LIST", true, target);
+						TcpClient dataConncetion = listener.AcceptTcpClient();
+						NetworkStream stream = dataConncetion.GetStream();
+
+						do {
+							byte[] buffer = new byte[256];
+							stream.Read(buffer, 0, buffer.Length);
+
+							string aline = Encoding.ASCII.GetString(buffer);
+							Console.Write(aline);
+						} while (stream.DataAvailable);
+
 						break;
 					case "get":
 						break;
