@@ -50,10 +50,17 @@ namespace FtpClient {
 
 			//TODO different logic for active and passive mode
 			try {
-				listener = port();
+				if(!this.isPassive)
+					listener = port();
+				else {
+					dataConnection = new TcpClient();
+					dataConnection.Connect(passive());
+					Console.WriteLine("client recieved");
+				}
 
 				FTPCmd("LIST", target);
-				dataConnection = listener.AcceptTcpClient();
+				if(!this.isPassive)
+					dataConnection = listener.AcceptTcpClient();
 				Console.WriteLine("client recieved");
 				this.Read(dataConnection.GetStream());
 				this.Read(this.stream);
