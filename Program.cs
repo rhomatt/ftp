@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -41,20 +42,54 @@ namespace FtpClient {
 			this.Read(this.stream);
 		}
 
-		// active passive FTP command
-		private void apFTPCmd(string cmd, params string[] args) {
+		private void list(string target) {
 			TcpListener listener = null;
 			TcpClient dataConnection = null;
 
+			//TODO different logic for active and passive mode
 			try {
 				listener = port();
 
-				FTPCmd(cmd, args);
+				FTPCmd("LIST", target);
 				dataConnection = listener.AcceptTcpClient();
 				this.Read(dataConnection.GetStream());
 				this.Read(this.stream);
 			} catch (Exception) {
-				Console.Error.WriteLine("An error occured trying to execute {0}", cmd);
+				Console.Error.WriteLine("An error occured trying to execute ls");
+			} finally {
+				if(listener != null)
+					listener.Stop();
+				if(dataConnection != null)
+					dataConnection.Dispose();
+			}
+		}
+
+		private void get(string target) {
+			TcpListener listener = null;
+			TcpClient dataConnection = null;
+
+			//TODO different logic for active and passive mode
+			try {
+				listener = port();
+
+				FTPCmd("RETR", target);
+				dataConnection = listener.AcceptTcpClient();
+				NetworkStream stream = dataConnection.GetStream();
+
+				FileStream file = File.Open(target, System.IO.FileMode.Create);
+
+				do {
+					byte[] buffer = new byte[256];
+					int read = stream.Read(buffer, 0, buffer.Length);
+
+					file.Write(buffer, 0, read);
+				} while (stream.DataAvailable);
+
+				file.Flush();
+				file.Dispose();
+				this.Read(this.stream);
+			} catch (Exception) {
+				Console.Error.WriteLine("An error occured trying to execute get");
 			} finally {
 				if(listener != null)
 					listener.Stop();
@@ -138,7 +173,6 @@ namespace FtpClient {
 		 *
 		 * return false if quitting, true otherwise */
 		private bool ParseCmd(string line) {
-			Console.Write(this.prompt);
 			if(line.Length <= 0)
 				return true;
 
@@ -166,12 +200,11 @@ namespace FtpClient {
 					case "ls":
 					case "dir":
 						target = args.Length == 1 ? "" : line.Split(' ', 2)[1];
-						apFTPCmd("LIST", target);
-
+						list(target);
 						break;
 					case "get":
 						target = args[1];
-						apFTPCmd("RETR", target);
+						get(target);
 						break;
 					case "?":
 					case "h":
@@ -206,7 +239,11 @@ namespace FtpClient {
 		}
 
 		public void Run() {
-			while(ParseCmd(Console.ReadLine()));
+			bool running = true;
+			while(running) {
+				Console.Write(this.prompt);
+				running = ParseCmd(Console.ReadLine());
+			}
 
 			this.connection.Close();
 		}
