@@ -12,6 +12,7 @@ namespace FtpClient {
 		bool binary = false; // false: ascii, true: binary
 		bool passive = false; // false: active, true: passive
 		IPAddress address;
+		string prompt = "ftp> ";
 
 		public Client(string address, int port) {
 			IPHostEntry hostEntries = Dns.GetHostEntry(address);
@@ -38,6 +39,28 @@ namespace FtpClient {
 
 			this.stream.Write(Encoding.ASCII.GetBytes(sb.ToString()));
 			this.Read(this.stream);
+		}
+
+		// active passive FTP command
+		private void apFTPCmd(string cmd, params string[] args) {
+			TcpListener listener = null;
+			TcpClient dataConnection = null;
+
+			try {
+				listener = port();
+
+				FTPCmd(cmd, args);
+				dataConnection = listener.AcceptTcpClient();
+				this.Read(dataConnection.GetStream());
+				this.Read(this.stream);
+			} catch (Exception) {
+				Console.Error.WriteLine("An error occured trying to execute {0}", cmd);
+			} finally {
+				if(listener != null)
+					listener.Stop();
+				if(dataConnection != null)
+					dataConnection.Dispose();
+			}
 		}
 
 		private void PrintHelp() {
@@ -115,13 +138,14 @@ namespace FtpClient {
 		 *
 		 * return false if quitting, true otherwise */
 		private bool ParseCmd(string line) {
+			Console.Write(this.prompt);
 			if(line.Length <= 0)
 				return true;
 
 			string[] args = line.Split(' ', 2);
 			string cmd = args[0];
+			string target;
 
-			TcpClient dataConncetion = null;
 			try {
 				switch(cmd) {
 					case "a":
@@ -131,24 +155,23 @@ namespace FtpClient {
 					case "binary":
 						break;
 					case "cd":
+						target = args[1];
+						FTPCmd("CWD", target);
 						break;
 					case "cdup":
+						FTPCmd("CDUP");
 						break;
 					case "debug":
 						break;
 					case "ls":
 					case "dir":
-						TcpListener listener = port();
-						string target = args.Length == 1 ? "" : line.Split(' ', 2)[1];
-
-						Console.WriteLine("listing...");
-						FTPCmd("LIST", target);
-						dataConncetion = listener.AcceptTcpClient();
-						this.Read(dataConncetion.GetStream());
-						this.Read(this.stream);
+						target = args.Length == 1 ? "" : line.Split(' ', 2)[1];
+						apFTPCmd("LIST", target);
 
 						break;
 					case "get":
+						target = args[1];
+						apFTPCmd("RETR", target);
 						break;
 					case "?":
 					case "h":
@@ -177,9 +200,6 @@ namespace FtpClient {
 				}
 			} catch (Exception) {
 				Console.Error.WriteLine("Invalid use of {0}", cmd);
-			} finally {
-				if(dataConncetion != null)
-					dataConncetion.Close();
 			}
 
 			return true;
