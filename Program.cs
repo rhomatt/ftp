@@ -28,7 +28,7 @@ namespace FtpClient {
 			this.Read(this.stream); // read the initial help message
 		}
 
-		private void FTPCmd(string cmd, params string[] args) {
+		private int FTPCmd(string cmd, params string[] args) {
 			StringBuilder sb = new StringBuilder();
 
 			sb.Append(cmd);
@@ -39,7 +39,7 @@ namespace FtpClient {
 			sb.Append("\r\n");
 
 			this.stream.Write(Encoding.ASCII.GetBytes(sb.ToString()));
-			this.Read(this.stream);
+			return this.Read(this.stream);
 		}
 
 		private void list(string target) {
@@ -52,6 +52,7 @@ namespace FtpClient {
 
 				FTPCmd("LIST", target);
 				dataConnection = listener.AcceptTcpClient();
+				Console.WriteLine("client recieved");
 				this.Read(dataConnection.GetStream());
 				this.Read(this.stream);
 			} catch (Exception) {
@@ -137,6 +138,7 @@ namespace FtpClient {
 			return null;
 		}
 
+		// return listener if port command succeeds, null otherwise
 		private TcpListener port() {
 			IPAddress localIP = this.getLocalIP(false);
 			Console.WriteLine(localIP.ToString());
@@ -154,18 +156,30 @@ namespace FtpClient {
 
 			Console.WriteLine("sending PORT {0}", arg);
 
-			FTPCmd("PORT", arg);
+			if(FTPCmd("PORT", arg) >= 400) {
+				listener.Stop();
+				Console.Error.WriteLine("active mode error");
+				throw new Exception("Port command failed");
+			}
+
 			return listener;
 		}
 
-		private void Read(NetworkStream stream) {
+		// return reply code, -1 if no reply code
+		private int Read(NetworkStream stream) {
+			int code = -1;
+
 			do {
 				byte[] buffer = new byte[256];
 				stream.Read(buffer, 0, buffer.Length);
 
 				string line = Encoding.ASCII.GetString(buffer);
+				Int32.TryParse(line.Split(' ')[0], out code);
+
 				Console.Write(line);
 			} while (stream.DataAvailable);
+
+			return code;
 		}
 
 		/*
