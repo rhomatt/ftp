@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace FtpClient {
@@ -10,8 +11,7 @@ namespace FtpClient {
 
 		TcpClient connection;
 		NetworkStream stream;
-		bool binary = false; // false: ascii, true: binary
-		bool passive = false; // false: active, true: passive
+		bool isPassive = false; // false: active, true: passive
 		IPAddress address;
 		string prompt = "ftp> ";
 
@@ -33,6 +33,8 @@ namespace FtpClient {
 
 			sb.Append(cmd);
 			foreach(string arg in args) {
+				if(arg.Trim() == "")
+					continue;
 				sb.Append(' ');
 				sb.Append(arg);
 			}
@@ -56,7 +58,6 @@ namespace FtpClient {
 				this.Read(dataConnection.GetStream());
 				this.Read(this.stream);
 			} catch (Exception) {
-				Console.Error.WriteLine("An error occured trying to execute ls");
 			} finally {
 				if(listener != null)
 					listener.Stop();
@@ -158,11 +159,28 @@ namespace FtpClient {
 
 			if(FTPCmd("PORT", arg) >= 400) {
 				listener.Stop();
-				Console.Error.WriteLine("active mode error");
 				throw new Exception("Port command failed");
 			}
 
 			return listener;
+		}
+
+		private IPEndPoint passive() {
+			this.stream.Write(Encoding.ASCII.GetBytes("PASV\r\n"));
+			byte[] buffer = new byte[256];
+			this.stream.Read(buffer);
+			string target = Encoding.ASCII.GetString(buffer);
+			Console.WriteLine(target);
+			Regex ipPattern = new Regex(@"\d+,\d+,\d+,\d+,\d+,\d+");
+			target = ipPattern.Match(target).Value;
+
+			string[] parts = target.Split(',');
+			int p1 = Int32.Parse(parts[4]);
+			int p2 = Int32.Parse(parts[5]);
+
+
+			IPAddress ip = IPAddress.Parse(parts[0] + '.' + parts[1] + '.' + parts[2] + '.' + parts[3]);
+			return new IPEndPoint(ip, p1*256 + p2);
 		}
 
 		// return reply code, -1 if no reply code
@@ -178,6 +196,8 @@ namespace FtpClient {
 
 				Console.Write(line);
 			} while (stream.DataAvailable);
+
+			Console.WriteLine("done");
 
 			return code;
 		}
@@ -198,9 +218,11 @@ namespace FtpClient {
 				switch(cmd) {
 					case "a":
 					case "ascii":
+						FTPCmd("TYPE", "A");
 						break;
 					case "b":
 					case "binary":
+						FTPCmd("TYPE", "I");
 						break;
 					case "cd":
 						target = args[1];
@@ -226,6 +248,8 @@ namespace FtpClient {
 						PrintHelp();
 						return true;
 					case "passive":
+						this.isPassive = !this.isPassive;
+						Console.WriteLine("Passive mode is {0}", this.isPassive ? "on" : "off");
 						break;
 					case "pwd":
 						FTPCmd("PWD");
@@ -245,7 +269,8 @@ namespace FtpClient {
 						Console.Error.WriteLine("Invalid command");
 						return true;
 				}
-			} catch (Exception) {
+			} catch (Exception e) {
+				Console.Error.WriteLine(e.Message);
 				Console.Error.WriteLine("Invalid use of {0}", cmd);
 			}
 
