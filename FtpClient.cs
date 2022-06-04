@@ -242,9 +242,15 @@ namespace FtpClient {
 				Int32.TryParse(line.Split(' ')[0], out code);
 
 				Console.Write(line);
+				/*
+				 * I would like to express that I really really did not want to have
+				 * to do a thread.sleep, but the client was having issues reading the debian ftp
+				 * welcome message (only part of the message would be read).
+				 *
+				 * This fixed it. I hope you can forgive me.
+				 */
+				Thread.Sleep(10);
 			} while (stream.DataAvailable);
-			// I have no idea why this is happening, but some messages
-			// contain extra data that isn't reported as available by stream.DataAvailable
 
 			Console.WriteLine("done");
 
