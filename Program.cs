@@ -12,6 +12,7 @@ namespace FtpClient {
 		TcpClient connection;
 		NetworkStream stream;
 		bool isPassive = false; // false: active, true: passive
+		bool debug = false;
 		IPAddress address;
 		string prompt = "ftp> ";
 
