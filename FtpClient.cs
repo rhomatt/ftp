@@ -36,7 +36,7 @@ namespace FtpClient {
 		 *
 		 * return FTP code
 		 */
-		private int FTPCmd(string cmd, params string[] args) {
+		private (int, string) FTPCmd(string cmd, params string[] args) {
 			StringBuilder sb = new StringBuilder();
 
 			sb.Append(cmd);
@@ -70,7 +70,9 @@ namespace FtpClient {
 					dataConnection.Connect(passive());
 				}
 
-				if(FTPCmd("LIST", target) >= 400)
+				int code;
+				(code, _) = FTPCmd("LIST", target);
+				if(code >= 400)
 					throw new Exception("Could not list");
 				if(!this.isPassive)
 					dataConnection = listener.AcceptTcpClient();
@@ -102,8 +104,15 @@ namespace FtpClient {
 					dataConnection.Connect(passive());
 				}
 
-				if(FTPCmd("RETR", target) >= 400)
+				int code;
+				string line;
+				(code, line) = FTPCmd("RETR", target);
+				if(code >= 400)
 					throw new Exception("Could not get");
+				Regex bytesToReadRegex = new Regex(@"\d+ bytes");
+				int bytesToRead = Int32.Parse(bytesToReadRegex.Match(line).Value.Split(' ')[0]);
+				int bytesRead = 0;
+
 				if(!this.isPassive)
 					dataConnection = listener.AcceptTcpClient();
 				NetworkStream stream = dataConnection.GetStream();
@@ -113,9 +122,16 @@ namespace FtpClient {
 				do {
 					byte[] buffer = new byte[256];
 					int read = stream.Read(buffer, 0, buffer.Length);
+					bytesRead += read;
+					//if(this.debug)
+						Console.WriteLine("Read {0} bytes", read);
 
 					file.Write(buffer, 0, read);
-				} while (stream.DataAvailable);
+					// Adding a delay here since DataAvailable is unreliable
+					Thread.Sleep(10);
+				} while (stream.DataAvailable || bytesRead < bytesToRead);
+
+				Console.WriteLine("Read {0} total bytes", bytesRead);
 
 				file.Flush();
 				file.Dispose();
@@ -191,7 +207,9 @@ namespace FtpClient {
 
 			Console.WriteLine("sending PORT {0}", arg);
 
-			if(FTPCmd("PORT", arg) >= 400) {
+			int code;
+			(code, _) = FTPCmd("PORT", arg);
+			if(code >= 400) {
 				listener.Stop();
 				throw new Exception("Port command failed");
 			}
@@ -229,10 +247,11 @@ namespace FtpClient {
 		 * Reads information from a given stream and prints it
 		 * TODO make it write to a stream given as an argument
 		 *
-		 * return FTP code, or -1 if none found
+		 * return FTP code, or -1 if none found and the last read line
 		 */
-		private int Read(NetworkStream stream) {
+		private (int, string) Read(NetworkStream stream) {
 			int code = -1;
+			string lastLine;
 
 			do {
 				byte[] buffer = new byte[256];
@@ -241,6 +260,7 @@ namespace FtpClient {
 				string line = Encoding.ASCII.GetString(buffer);
 				Int32.TryParse(line.Split(' ')[0], out code);
 
+				lastLine = line;
 				Console.Write(line);
 				/*
 				 * I would like to express that I really really did not want to have
@@ -253,9 +273,7 @@ namespace FtpClient {
 				Thread.Sleep(10);
 			} while (stream.DataAvailable);
 
-			Console.WriteLine("done");
-
-			return code;
+			return (code, lastLine);
 		}
 
 		/*
