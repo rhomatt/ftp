@@ -57,7 +57,8 @@ namespace FtpClient {
 					dataConnection.Connect(passive());
 				}
 
-				FTPCmd("LIST", target);
+				if(FTPCmd("LIST", target) >= 400)
+					throw new Exception("Could not list");
 				if(!this.isPassive)
 					dataConnection = listener.AcceptTcpClient();
 				Console.WriteLine("client recieved");
@@ -85,7 +86,8 @@ namespace FtpClient {
 					dataConnection.Connect(passive());
 				}
 
-				FTPCmd("RETR", target);
+				if(FTPCmd("RETR", target) >= 400)
+					throw new Exception("Could not get");
 				if(!this.isPassive)
 					dataConnection = listener.AcceptTcpClient();
 				NetworkStream stream = dataConnection.GetStream();
