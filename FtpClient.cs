@@ -49,6 +49,7 @@ namespace FtpClient {
 			sb.Append("\r\n");
 
 			this.stream.Write(Encoding.ASCII.GetBytes(sb.ToString()));
+
 			return this.Read(this.stream);
 		}
 
@@ -232,11 +233,10 @@ namespace FtpClient {
 		 */
 		private int Read(NetworkStream stream) {
 			int code = -1;
-			StreamReader reader = new StreamReader(stream);
 
 			do {
 				byte[] buffer = new byte[256];
-				int bytesRead = stream.Read(buffer, 0, buffer.Length);
+				stream.Read(buffer, 0, buffer.Length);
 
 				string line = Encoding.ASCII.GetString(buffer);
 				Int32.TryParse(line.Split(' ')[0], out code);
@@ -246,6 +246,7 @@ namespace FtpClient {
 				 * I would like to express that I really really did not want to have
 				 * to do a thread.sleep, but the client was having issues reading the debian ftp
 				 * welcome message (only part of the message would be read).
+				 * More like stream.DataAvailable was lying to me.
 				 *
 				 * This fixed it. I hope you can forgive me.
 				 */
