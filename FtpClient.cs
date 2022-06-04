@@ -29,6 +29,11 @@ namespace FtpClient {
 			this.Read(this.stream); // read the initial help message
 		}
 
+		/*
+		 * Perform some arbitrary FTP command
+		 *
+		 * return FTP code
+		 */
 		private int FTPCmd(string cmd, params string[] args) {
 			StringBuilder sb = new StringBuilder();
 
@@ -45,6 +50,10 @@ namespace FtpClient {
 			return this.Read(this.stream);
 		}
 
+		/*
+		 * FTP LIST command. Lists the target directory
+		 * give an empty string as the target to list the current working directory
+		 */
 		private void list(string target) {
 			TcpListener listener = null;
 			TcpClient dataConnection = null;
@@ -74,6 +83,9 @@ namespace FtpClient {
 			}
 		}
 
+		/*
+		 * FTP RETR command. Downloads a file.
+		 */
 		private void get(string target) {
 			TcpListener listener = null;
 			TcpClient dataConnection = null;
@@ -154,7 +166,11 @@ namespace FtpClient {
 			return null;
 		}
 
-		// return listener if port command succeeds, null otherwise
+		/*
+		 * Initiates an active FTP connection
+		 *
+		 * return the listener that will accept the conection from the FTP server
+		 */
 		private TcpListener port() {
 			IPAddress localIP = this.getLocalIP(false);
 			Console.WriteLine(localIP.ToString());
@@ -180,6 +196,11 @@ namespace FtpClient {
 			return listener;
 		}
 
+		/*
+		 * Initiates a passive FTP connection
+		 *
+		 * return the IPEndPoint to connect to, given by the FTP server
+		 */
 		private IPEndPoint passive() {
 			this.stream.Write(Encoding.ASCII.GetBytes("PASV\r\n"));
 			byte[] buffer = new byte[256];
@@ -201,7 +222,12 @@ namespace FtpClient {
 			return new IPEndPoint(ip, p1*256 + p2);
 		}
 
-		// return reply code, -1 if no reply code
+		/*
+		 * Reads information from a given stream and prints it
+		 * TODO make it write to a stream given as an argument
+		 *
+		 * return FTP code, or -1 if none found
+		 */
 		private int Read(NetworkStream stream) {
 			int code = -1;
 
@@ -223,7 +249,8 @@ namespace FtpClient {
 		/*
 		 * Parses a command and performs some logic.
 		 *
-		 * return false if quitting, true otherwise */
+		 * return false if quitting, true otherwise
+		 */
 		private bool ParseCmd(string line) {
 			if(line.Length <= 0)
 				return true;
@@ -295,6 +322,9 @@ namespace FtpClient {
 			return true;
 		}
 
+		/*
+		 * Main loop
+		 */
 		public void Run() {
 			bool running = true;
 			while(running) {
@@ -312,6 +342,7 @@ namespace FtpClient {
 			}
 
 			string address = args[0];
+			// Look for an arg from the user. Otherwise connect on the default port, 21
 			int port = args.Length > 1 ? Int32.Parse(args[1]) : 21;
 
 			Client client = new Client(address, port);
