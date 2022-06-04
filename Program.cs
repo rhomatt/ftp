@@ -55,7 +55,6 @@ namespace FtpClient {
 				else {
 					dataConnection = new TcpClient();
 					dataConnection.Connect(passive());
-					Console.WriteLine("client recieved");
 				}
 
 				FTPCmd("LIST", target);
@@ -79,10 +78,16 @@ namespace FtpClient {
 
 			//TODO different logic for active and passive mode
 			try {
-				listener = port();
+				if(!this.isPassive)
+					listener = port();
+				else {
+					dataConnection = new TcpClient();
+					dataConnection.Connect(passive());
+				}
 
 				FTPCmd("RETR", target);
-				dataConnection = listener.AcceptTcpClient();
+				if(!this.isPassive)
+					dataConnection = listener.AcceptTcpClient();
 				NetworkStream stream = dataConnection.GetStream();
 
 				FileStream file = File.Open(target, System.IO.FileMode.Create);
@@ -178,6 +183,9 @@ namespace FtpClient {
 			this.stream.Read(buffer);
 			string target = Encoding.ASCII.GetString(buffer);
 			Console.WriteLine(target);
+			int code = Int32.Parse(target.Split(' ')[0]);
+			if(code >= 400)
+				throw new Exception("An error occured when trying to send the PASV command");
 			Regex ipPattern = new Regex(@"\d+,\d+,\d+,\d+,\d+,\d+");
 			target = ipPattern.Match(target).Value;
 
