@@ -23,7 +23,9 @@ namespace FtpClient {
 					this.address = curraddr;
 
 			this.connection = new TcpClient();
+			Console.WriteLine("Trying to connect to {0} on port {1}", this.address, port);
 			this.connection.Connect(this.address, port);
+			Console.WriteLine("Connected successfully");
 			this.stream = this.connection.GetStream();
 
 			this.Read(this.stream); // read the initial help message
@@ -230,16 +232,19 @@ namespace FtpClient {
 		 */
 		private int Read(NetworkStream stream) {
 			int code = -1;
+			StreamReader reader = new StreamReader(stream);
 
 			do {
 				byte[] buffer = new byte[256];
-				stream.Read(buffer, 0, buffer.Length);
+				int bytesRead = stream.Read(buffer, 0, buffer.Length);
 
 				string line = Encoding.ASCII.GetString(buffer);
 				Int32.TryParse(line.Split(' ')[0], out code);
 
 				Console.Write(line);
 			} while (stream.DataAvailable);
+			// I have no idea why this is happening, but some messages
+			// contain extra data that isn't reported as available by stream.DataAvailable
 
 			Console.WriteLine("done");
 
