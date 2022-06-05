@@ -214,12 +214,17 @@ namespace FtpServer {
 
 		public void Run(){
 			EndPoint clientAddress = this.client.Client.RemoteEndPoint;
-			foreach(string line in this.welcomeMessage)
-				this.WriteToClient(220, line);
-			while(ParseCmd(this.fromClient.ReadLine()));
-
-			this.client.Close();
-			Console.WriteLine("Session with {0} stopped", clientAddress.ToString());
+			try {
+				foreach(string line in this.welcomeMessage)
+					this.WriteToClient(220, line);
+				while(ParseCmd(this.fromClient.ReadLine()));
+			} catch (Exception e) {
+				Console.Error.WriteLine("Something bad happened while servicing the client");
+				Console.Error.WriteLine(e.Message);
+			} finally {
+				this.client.Close();
+				Console.WriteLine("Session with {0} stopped", clientAddress.ToString());
+			}
 		}
 
 		public static void Main(string[] args) {
