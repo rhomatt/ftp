@@ -9,31 +9,106 @@ using System.Threading.Tasks;
 
 namespace FtpServer {
 	class Server {
-        public static TcpListener server = new TcpListener(IPAddress.Any, 2121);
+		public static TcpListener server = new TcpListener(IPAddress.Any, 2121);
+		private TcpClient client;
+		private StreamReader fromClient;
+		private StreamWriter toClient;
+		private bool passive = false;
 
-		public static void PerClientServer(TcpClient client){
-			bool fromDone = false;
+		public Server() {
+			this.client = server.AcceptTcpClient();
+			this.fromClient = new StreamReader(this.client.GetStream());
+			this.toClient = new StreamWriter(this.client.GetStream());
+		}
 
-			Task FromClient = Task.Run(async () => {
-				NetworkStream stream = client.GetStream();
+		private void WriteToClient(int code, string message) {
+			StringBuilder sb = new StringBuilder();
+			sb.Append(code);
+			sb.Append(message);
+			sb.Append("\r\n");
 
-				while(true) {
-					// do nothing until we read a line in
-					byte[] buffer = new byte[256];
-					int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
+			this.toClient.Write(sb);
+			this.toClient.Flush();
+		}
+
+		private void SendClientData(byte[] data) {
+			TcpClient dataConnection = null;
+			TcpListener dataListener = null;
+
+			try {
+				if(this.passive) {
+					IPAddress clientAddress = ((IPEndPoint) this.client.Client.LocalEndPoint).Address;
+					dataListener = new TcpListener(clientAddress, 0);
+					dataListener.Start();
+					// why the TcpClient capitalizes point and the TcpListener doesn't, I will never understand...
+					int port = ((IPEndPoint) dataListener.LocalEndpoint).Port;
+				} else {
+
 				}
-			});
+			} catch (Exception) {
+			} finally {
+				if(dataConnection != null)
+					dataConnection.Close();
+				if(dataListener != null)
+					dataListener.Stop();
+			}
+		}
 
-			Task ToClient = Task.Run(async () => {
-				StreamWriter stream = new StreamWriter(client.GetStream());
-				while(!fromDone) {
-					await stream.WriteLineAsync("temp");
+		private bool ParseCmd(string line) {
+			if(line.Length <= 0)
+				return true;
+
+			string[] args = line.Trim().Split(' ', 2);
+			string cmd = args[0];
+			string target;
+
+			try {
+				switch(cmd) {
+					case "TYPE":
+						if(args[1] == "A") {
+						}
+						else if(args[1] == "I") {
+						}
+						else {
+						}
+						break;
+					case "CWD":
+						target = args[1];
+						break;
+					case "CDUP":
+						break;
+					case "LIST":
+						target = args[1];
+						break;
+					case "RETR":
+						target = args[1];
+						break;
+					case "PASV":
+						break;
+					case "PWD":
+						break;
+					case "QUIT":
+						return false;
+					case "USER":
+						break;
+					case "PASS":
+						break;
+					default:
+						Console.Error.WriteLine("Invalid command");
+						return true;
 				}
-				stream.Close();
-			});
+			} catch (Exception e) {
+				Console.Error.WriteLine(e.Message);
+				Console.Error.WriteLine("Invalid use of {0}", cmd);
+			}
 
-			FromClient.Wait();
-			ToClient.Wait();
+			return true;
+		} 
+
+		public void Run(){
+			while(ParseCmd(this.fromClient.ReadLine()));
+
+			this.client.Close();
 		}
 
 		public static void Main(string[] args) {
@@ -41,9 +116,11 @@ namespace FtpServer {
 			Server.server.Start();
 			Console.WriteLine("Server started");
 
+			TcpClient client = server.AcceptTcpClient();
+
 			while(true) {
-				TcpClient client = server.AcceptTcpClient();
-				ThreadPool.QueueUserWorkItem((object _) => Server.PerClientServer(client));
+				Server server = new Server();
+				ThreadPool.QueueUserWorkItem((object _) => server.Run());
 			}
 		}
 	}
