@@ -13,7 +13,6 @@ namespace FtpClient {
 		private NetworkStream stream;
 		private bool isPassive = false; // false: active, true: passive
 		private bool debug = false;
-		private IPAddress address;
 		private string prompt = "ftp> ";
 		private int dataPort;
 
@@ -21,16 +20,21 @@ namespace FtpClient {
 			this.dataPort = dataPort;
 			IPHostEntry hostEntries = Dns.GetHostEntry(address);
 			foreach(IPAddress curraddr in hostEntries.AddressList)
-				if(curraddr.AddressFamily.ToString() == ProtocolFamily.InterNetwork.ToString())
-					this.address = curraddr;
+				if(curraddr.AddressFamily.ToString() == ProtocolFamily.InterNetwork.ToString()) {
+					try {
+						this.connection = new TcpClient();
+						Console.WriteLine("Trying to connect to {0} on port {1}", curraddr, port);
+						this.connection.Connect(curraddr, port);
+						Console.WriteLine("Connected successfully");
+						this.stream = this.connection.GetStream();
 
-			this.connection = new TcpClient();
-			Console.WriteLine("Trying to connect to {0} on port {1}", this.address, port);
-			this.connection.Connect(this.address, port);
-			Console.WriteLine("Connected successfully");
-			this.stream = this.connection.GetStream();
-
-			this.Read(this.stream); // read the initial help message
+						this.Read(this.stream); // read the initial help message
+						return;
+					} catch (Exception e) {
+						Console.Error.WriteLine("Could not connect to {0}.", curraddr.ToString());
+						Console.Error.WriteLine(e.Message);
+					}
+				}
 		}
 
 		/*
@@ -259,7 +263,8 @@ namespace FtpClient {
 
 				string line = Encoding.ASCII.GetString(buffer);
 				Regex grepCode = new Regex(@"^\d+");
-				code = Int32.Parse(grepCode.Match(line).Value);
+				string match = grepCode.Match(line).Value;
+				Int32.TryParse(match, out code);
 
 				/*
 				 * It looks like anything that has a dash after the code indicates that there is more
