@@ -397,7 +397,7 @@ namespace FtpClient {
 
 		public static void Main(string[] args) {
 			if(args.Length < 1) {
-				Console.WriteLine("usage: ftp target [ftp_port ftp_data_port]");
+				Console.WriteLine("usage: ftp target [ftp_port]");
 				return;
 			}
 
