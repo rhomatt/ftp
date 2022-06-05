@@ -169,7 +169,10 @@ namespace FtpServer {
 			try {
 				switch(cmd) {
 					case "TYPE":
-						this.WriteToClient(502, "Sorry, only binary mode is supported");
+						if(args[1] != "I")
+							this.WriteToClient(502, " Sorry, only binary mode is supported");
+						else
+							this.WriteToClient(200, " Switching to Binary mode.");
 						break;
 					case "LIST":
 						this.List();
