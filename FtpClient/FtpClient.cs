@@ -54,7 +54,7 @@ namespace FtpClient {
 		 *
 		 * return FTP code
 		 */
-		private (int, string) FTPCmd(string cmd, params string[] args) {
+		private int FTPCmd(string cmd, params string[] args) {
 			StringBuilder sb = new StringBuilder();
 
 			sb.Append(cmd);
@@ -88,12 +88,11 @@ namespace FtpClient {
 				}
 
 				int code;
-				(code, _) = FTPCmd("LIST", target);
+				code = FTPCmd("LIST", target);
 				if(code >= ERROR_LEVEL)
 					throw new Exception("Could not list");
 				if(!this.isPassive)
 					dataConnection = listener.AcceptTcpClient();
-				Console.WriteLine("client recieved");
 				this.Read(dataConnection.GetStream());
 				this.Read(this.stream);
 			} catch (Exception) {
@@ -120,31 +119,26 @@ namespace FtpClient {
 					dataConnection.Connect(passive());
 				}
 
-				int code;
-				string line;
-				(code, line) = FTPCmd("RETR", target);
+				int code = FTPCmd("RETR", target);
 				if(code >= ERROR_LEVEL)
 					throw new Exception("Could not get");
-				Regex bytesToReadRegex = new Regex(@"\d+ bytes");
-				int bytesToRead = Int32.Parse(bytesToReadRegex.Match(line).Value.Split(' ')[0]);
-				int bytesRead = 0;
 
 				if(!this.isPassive)
 					dataConnection = listener.AcceptTcpClient();
 				NetworkStream stream = dataConnection.GetStream();
 
 				FileStream file = File.Open(target, System.IO.FileMode.Create);
+				int bytesRead = 0;
 
 				do {
 					byte[] buffer = new byte[256];
 					int read = stream.Read(buffer, 0, buffer.Length);
 					bytesRead += read;
-					//if(this.debug)
+					if(this.debug)
 						Console.WriteLine("Read {0} bytes, {1} so far", read, bytesRead);
 
 					file.Write(buffer, 0, read);
-					// Adding a delay here since DataAvailable is unreliable
-				} while (stream.DataAvailable || bytesRead < bytesToRead);
+				} while (stream.DataAvailable && bytesRead > 0);
 
 				Console.WriteLine("Read {0} total bytes", bytesRead);
 
@@ -221,8 +215,7 @@ namespace FtpClient {
 
 			Console.WriteLine("sending PORT {0}", arg);
 
-			int code;
-			(code, _) = FTPCmd("PORT", arg);
+			int code = FTPCmd("PORT", arg);
 			if(code >= ERROR_LEVEL) {
 				listener.Stop();
 				throw new Exception("Port command failed");
@@ -263,9 +256,8 @@ namespace FtpClient {
 		 *
 		 * return FTP code, or -1 if none found and the last read line
 		 */
-		private (int, string) Read(NetworkStream stream) {
+		private int Read(NetworkStream stream) {
 			int code = -1;
-			string lastLine;
 			int bytesRead = 0;
 			bool unfinished = false;
 
@@ -280,7 +272,7 @@ namespace FtpClient {
 
 				/*
 				 * It looks like anything that has a dash after the code indicates that there is more
-				 * data to be sent.
+				 * data to be sent (at least this is how the GNU FTP client seems to be implemented).
 				 *
 				 * Thankfully, this means I don't have to do a Thread.Sleep, which is almost what I did
 				 * Also I discovered this more or less by complete accident
@@ -288,21 +280,10 @@ namespace FtpClient {
 				Regex checkUnfinished = new Regex(@"^\d+-");
 				unfinished = checkUnfinished.IsMatch(line);
 
-				lastLine = line;
 				Console.Write(line);
-				/*
-				 * I would like to express that I really really did not want to have
-				 * to do a thread.sleep, but the client was having issues reading the debian ftp
-				 * welcome message (only part of the message would be read).
-				 * More like stream.DataAvailable was lying to me.
-				 *
-				 * This fixed it. I hope you can forgive me.
-				 *
-				 */
-				//Thread.Sleep(10);
 			} while (stream.DataAvailable && bytesRead > 0 || unfinished);
 
-			return (code, lastLine);
+			return code;
 		}
 
 		/*
@@ -381,13 +362,9 @@ namespace FtpClient {
 			return true;
 		}
 
-		private void PromptInitialLogin(string address) {
-		}
-
 		private void Login() {
 			string user = Console.ReadLine();
-			int code;
-			(code, _) = this.FTPCmd("USER", user);
+			int code = this.FTPCmd("USER", user);
 			if(code >= ERROR_LEVEL)
 				return;
 
