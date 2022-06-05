@@ -20,8 +20,11 @@ namespace FtpClient {
 		private bool debug = false;
 		private string prompt = "ftp> ";
 
+		// if at or above this, it indicates a command failed
 		private static readonly int ERROR_LEVEL = 400;
+		private static readonly int FTP_PORT = 21;
 
+		// create a client on a specified address and port
 		public Client(string address, int port) {
 			IPHostEntry hostEntries = Dns.GetHostEntry(address);
 
@@ -52,7 +55,7 @@ namespace FtpClient {
 		/*
 		 * Perform some arbitrary FTP command
 		 *
-		 * return FTP code
+		 * return the FTP code
 		 */
 		private int FTPCmd(string cmd, params string[] args) {
 			StringBuilder sb = new StringBuilder();
@@ -93,9 +96,12 @@ namespace FtpClient {
 					throw new Exception("Could not list");
 				if(!this.isPassive)
 					dataConnection = listener.AcceptTcpClient();
+				// list the contents of the current working directory
 				this.Read(dataConnection.GetStream());
+				// server should notify that transfer finished
 				this.Read(this.stream);
 			} catch (Exception) {
+				Console.Error.WriteLine("An error occured trying to execute LIST");
 			} finally {
 				if(listener != null)
 					listener.Stop();
@@ -146,9 +152,10 @@ namespace FtpClient {
 
 				file.Flush();
 				file.Dispose();
+				// server should notify that transfer finished
 				this.Read(this.stream);
 			} catch (Exception) {
-				Console.Error.WriteLine("An error occured trying to execute get");
+				Console.Error.WriteLine("An error occured trying to execute RETR");
 			} finally {
 				if(listener != null)
 					listener.Stop();
@@ -183,6 +190,7 @@ namespace FtpClient {
 		}
 
 		// returns local ipv4 address
+		// Null if nothing found (which should never happen)
 		private IPAddress GetLocalIP() {
 			IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
 			foreach (IPAddress address in host.AddressList) {
@@ -254,9 +262,8 @@ namespace FtpClient {
 
 		/*
 		 * Reads information from a given stream and prints it
-		 * TODO make it write to a stream given as an argument
 		 *
-		 * return FTP code, or -1 if none found and the last read line
+		 * return FTP code, or -1 if none found
 		 */
 		private int Read(NetworkStream stream) {
 			int code = -1;
@@ -289,7 +296,7 @@ namespace FtpClient {
 		}
 
 		/*
-		 * Parses a command and performs some logic.
+		 * Parses a command and performs some relevent logic.
 		 *
 		 * return false if quitting, true otherwise
 		 */
@@ -364,6 +371,7 @@ namespace FtpClient {
 			return true;
 		}
 
+		// login to remote server
 		private void Login() {
 			string user = Console.ReadLine();
 			int code = this.FTPCmd("USER", user);
@@ -395,7 +403,7 @@ namespace FtpClient {
 
 			string address = args[0];
 			// Look for an arg from the user. Otherwise connect on the default port, 21
-			int port = args.Length > 1 ? Int32.Parse(args[1]) : 21;
+			int port = args.Length > 1 ? Int32.Parse(args[1]) : FTP_PORT;
 
 			Client client = new Client(address, port);
 
