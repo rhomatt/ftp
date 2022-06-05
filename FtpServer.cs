@@ -31,6 +31,39 @@ namespace FtpServer {
 			this.toClient.Flush();
 		}
 
+		// returns local ipv4 address
+		private IPAddress GetLocalIP() {
+			IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
+			foreach (IPAddress address in host.AddressList) {
+				ProtocolFamily ipType = ProtocolFamily.InterNetwork;
+
+				if(address.AddressFamily.ToString() == ipType.ToString())
+					return address;
+			}
+
+			return null;
+		}
+
+		// only to be called in passive mode
+		// returns an unstarted TcpListener to prepare for the incoming TCP connection
+		private TcpListener SendIPEndpoint() {
+			IPAddress clientAddress = ((IPEndPoint) this.client.Client.LocalEndPoint).Address;
+			TcpListener dataListener = new TcpListener(clientAddress, 0);
+			// why the TcpClient capitalizes point and the TcpListener doesn't, I will never understand...
+			int port = ((IPEndPoint) dataListener.LocalEndpoint).Port;
+			int p1 = port / 256;
+			int p2 = port - p1 * 256;
+
+			int code = 227;
+			StringBuilder data = new StringBuilder();
+			data.Append(" Entering Passive Mode (");
+			data.Append(this.GetLocalIP().ToString().Replace('.', ','));
+			data.AppendFormat(",{0},{1})", p1, p2);
+			this.WriteToClient(code, data.ToString());
+
+			return dataListener;
+		}
+
 		private void SendClientData(byte[] data) {
 			TcpClient dataConnection = null;
 			TcpListener dataListener = null;
