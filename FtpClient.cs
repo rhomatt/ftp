@@ -59,11 +59,10 @@ namespace FtpClient {
 		 * FTP LIST command. Lists the target directory
 		 * give an empty string as the target to list the current working directory
 		 */
-		private void list(string target) {
+		private void List(string target) {
 			TcpListener listener = null;
 			TcpClient dataConnection = null;
 
-			//TODO different logic for active and passive mode
 			try {
 				if(!this.isPassive)
 					listener = port();
@@ -97,7 +96,6 @@ namespace FtpClient {
 			TcpListener listener = null;
 			TcpClient dataConnection = null;
 
-			//TODO different logic for active and passive mode
 			try {
 				if(!this.isPassive)
 					listener = port();
@@ -126,11 +124,10 @@ namespace FtpClient {
 					int read = stream.Read(buffer, 0, buffer.Length);
 					bytesRead += read;
 					//if(this.debug)
-						Console.WriteLine("Read {0} bytes", read);
+						Console.WriteLine("Read {0} bytes, {1} so far", read, bytesRead);
 
 					file.Write(buffer, 0, read);
 					// Adding a delay here since DataAvailable is unreliable
-					Thread.Sleep(10);
 				} while (stream.DataAvailable || bytesRead < bytesToRead);
 
 				Console.WriteLine("Read {0} total bytes", bytesRead);
@@ -253,10 +250,11 @@ namespace FtpClient {
 		private (int, string) Read(NetworkStream stream) {
 			int code = -1;
 			string lastLine;
+			int bytesRead = 0;
 
 			do {
 				byte[] buffer = new byte[256];
-				stream.Read(buffer, 0, buffer.Length);
+				bytesRead = stream.Read(buffer, 0, buffer.Length);
 
 				string line = Encoding.ASCII.GetString(buffer);
 				Int32.TryParse(line.Split(' ')[0], out code);
@@ -270,9 +268,12 @@ namespace FtpClient {
 				 * More like stream.DataAvailable was lying to me.
 				 *
 				 * This fixed it. I hope you can forgive me.
+				 *
+				 * TODO it looks like anything that has a dash after the code indicates that there is more
+				 * data to be sent.
 				 */
-				Thread.Sleep(10);
-			} while (stream.DataAvailable);
+				//Thread.Sleep(10);
+			} while (stream.DataAvailable && bytesRead > 0);
 
 			return (code, lastLine);
 		}
@@ -312,7 +313,7 @@ namespace FtpClient {
 					case "ls":
 					case "dir":
 						target = args.Length == 1 ? "" : line.Split(' ', 2)[1];
-						list(target);
+						List(target);
 						break;
 					case "get":
 						target = args[1];
