@@ -133,14 +133,16 @@ namespace FtpClient {
 				do {
 					byte[] buffer = new byte[256];
 					int read = stream.Read(buffer, 0, buffer.Length);
-					bytesRead += read;
+					bytesRead = read;
 					if(this.debug)
 						Console.WriteLine("Read {0} bytes, {1} so far", read, bytesRead);
 
 					file.Write(buffer, 0, read);
-				} while (stream.DataAvailable && bytesRead > 0);
+					// the connection is closed upon completion, so we can just check if bytes read is 0
+				} while (bytesRead > 0);
 
-				Console.WriteLine("Read {0} total bytes", bytesRead);
+				if(this.debug)
+					Console.WriteLine("Read {0} total bytes", bytesRead);
 
 				file.Flush();
 				file.Dispose();

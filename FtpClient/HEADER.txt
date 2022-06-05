@@ -1,0 +1,25 @@
+###########################################################
+          o8o      .                       .o8              
+          `"'    .o8                      "888              
+oooo d8b oooo  .o888oo      .ooooo.   .oooo888  oooo  oooo  
+`888""8P `888    888       d88' `88b d88' `888  `888  `888  
+ 888      888    888       888ooo888 888   888   888   888  
+ 888      888    888 . .o. 888    .o 888   888   888   888  
+d888b    o888o   "888" Y8P `Y8bod8P' `Y8bod88P"  `V88V"V8P'
+###########################################################
+
+                 Welcome mirrors.rit.edu 
+This mirror is run by RIT's Research Computing department.
+
+We have many many gigglebits of bandwidth. In theory, you
+or the network inbetween is the limit.
+
+If you are having issues, please contact the mirror admins:
+		mirrors-ihatespam@rit.edu.
+
+Don't forget that we hate spam so just remove it.
+
+Please include the file you are trying to download or at
+least the distribution you are having issues with.
+
+###########################################################

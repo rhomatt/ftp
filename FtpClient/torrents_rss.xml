@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/"
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+  xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+  xmlns:trackback="http://madskills.com/public/xml/rss/module/trackback/">
+  <channel>
+    <title>Torrent Files on http://mirrors.rit.edu</title>
+    <link>http://mirrors.rit.edu/torrents_rss.xml</link>
+    <description>Torrent Files on http://mirrors.rit.edu</description>
+    <pubDate>Fri, 15 Mar 2019 18:47:09 -0000</pubDate>
+    <item>
+      <title>F29-LXDE-x86_64-20190311-Live.iso</title>
+      <link>http://mirrors.rit.edu/fedora/alt/live-respins/F29-LXDE-x86_64-20190311-Live.torrent</link>
+      <description>Name: F29-LXDE-x86_64-20190311-Live.iso; Repo: fedora; Total size: 1348468736; File count: 1; Comment: ISO SHA512SUM: 8f0ce75ab7e8285f9d7711aa775f33a29a5d1655098c987a8be69c2e06e39814e41528c27c4f51d87f0f0adba53210d96988aea276e08e4e3592d2b9dcafd438  F29-LXDE-x86_64-20190311-Live.iso</description>
+      <author>fedora</author>
+      <pubDate>Mon, 11 Mar 2019 13:47:44 -0000</pubDate>
+      <guid isPermaLink="false">f5dd49e0d44b921d301468ac2bd735973cc1b2ca7ad79ae0414ac0cdce9bb989</guid>
+      <dc:date>2019-03-11T13:47:44Z</dc:date>
+    </item>
+    <item>
+      <title>F29-WORK-x86_64-20190311-Live.iso</title>
+      <link>http://mirrors.rit.edu/fedora/alt/live-respins/F29-WORK-x86_64-20190311-Live.torrent</link>
+      <description>Name: F29-WORK-x86_64-20190311-Live.iso; Repo: fedora; Total size: 1947205632; File count: 1; Comment: ISO SHA512SUM: c2643d3a26fcf34d1adef7a310073d92310abd7f6eb2333e36231f8f0daacdaa675dfbe2e4d802d196b6b71861d68ca55d5bc0dbed28519941950ff573a9ef85  F29-WORK-x86_64-20190311-Live.iso</description>
+      <author>fedora</author>
+      <pubDate>Mon, 11 Mar 2019 13:45:27 -0000</pubDate>
+      <guid isPermaLink="false">1e8c8fac2008e39c081f5a68244f3cc63154c6689ef894201b73c8dd3eb37cd1</guid>
+      <dc:date>2019-03-11T13:45:27Z</dc:date>
+    </item>
+    <item>
+      <title>F29-SOAS-x86_64-20190311-Live.iso</title>
+      <link>http://mirrors.rit.edu/fedora/alt/live-respins/F29-SOAS-x86_64-20190311-Live.torrent</link>
+      <description>Name: F29-SOAS-x86_64-20190311-Live.iso; Repo: fedora; Total size: 995098624; File count: 1; Comment: ISO SHA512SUM: 2228f2893fc7b34ec1c45dfc3ae77e40242bbc919c22644d580c39c4b7030ae693880bac546618f3707bf44ed9fbe6099d533ba3af6a553ffb99d05eafc9b79c  F29-SOAS-x86_64-20190311-Live.iso</description>
+      <author>fedora</author>
+      <pubDate>Mon, 11 Mar 2019 13:40:51 -0000</pubDate>
+      <guid isPermaLink="false">a7199b2094d1788ca7a10b1ac6a109c5924153494fb9ea347a7a6f5bbdb7fee9</guid>
+      <dc:date>2019-03-11T13:40:51Z</dc:date>
+    </item>
+    <item>
+      <title>F29-CINN-x86_64-20190311-Live.iso</title>
+      <link>http://mirrors.rit.edu/fedora/alt/live-respins/F29-CINN-x86_64-20190311-Live.torrent</link>
+      <description>Name: F29-CINN-x86_64-20190311-Live.iso; Repo: fedora; Total size: 2053111808; File count: 1; Comment: ISO SHA512SUM: 80500d0a475cb5c48d0ee08a54c8f480e0d0285f9b644fc5a9c29f3d34984f19ecfd8ed488d1cdbffabd0e1c3c8d6d5b59c827b216412e0e4cfa8d4ab15aca3b  F29-CINN-x86_64-20190311-Live.iso</description>
+      <author>fedora</author>
+      <pubDate>Mon, 11 Mar 2019 13:27:52 -0000</pubDate>
+      <guid isPermaLink="false">52fe33aa1baaaf7e23fb4ec8d0abd4d75ecedfd840c089abf2be2a8ad0f73068</guid>
+      <dc:date>2019-03-11T13:27:52Z</dc:date>
+    </item>
+    <item>
+      <title>F29-MATE-x86_64-20190311-Live.iso</title>
+      <link>http://mirrors.rit.edu/fedora/alt/live-respins/F29-MATE-x86_64-20190311-Live.torrent</link>
+      <description>Name: F29-MATE-x86_64-20190311-Live.iso; Repo: fedora; Total size: 1988100096; File count: 1; Comment: ISO SHA512SUM: f8c399b7bf2667f84aea4da922857a6d17176863b37e1cdcf367b32a4c86ba28a54ba876331f0856ac06ecb6941d08d1dad8bef103ad3fc666148b84bbf43564  F29-MATE-x86_64-20190311-Live.iso</description>
+      <author>fedora</author>
+      <pubDate>Mon, 11 Mar 2019 13:26:58 -0000</pubDate>
+      <guid isPermaLink="false">ddf638bcae3ab56451d1248defa36e33e3107f08545714bcebfbd62b5b52e72f</guid>
+      <dc:date>2019-03-11T13:26:58Z</dc:date>
+    </item>
+    <item>
+      <title>F29-KDE-x86_64-20190311-Live.iso</title>
+      <link>http://mirrors.rit.edu/fedora/alt/live-respins/F29-KDE-x86_64-20190311-Live.torrent</link>
+      <description>Name: F29-KDE-x86_64-20190311-Live.iso; Repo: fedora; Total size: 1875902464; File count: 1; Comment: ISO SHA512SUM: cc1fc419ed755c23f289aa8faf795f9466613f50530f7c5d0f6ba2c575fa8ed5920b54a1ab59d0965229069747f5bd01a09dd52f6aa5438146bc4cf3e29241ae  F29-KDE-x86_64-20190311-Live.iso</description>
+      <author>fedora</author>
+      <pubDate>Mon, 11 Mar 2019 13:25:21 -0000</pubDate>
+      <guid isPermaLink="false">c88c8bc4affd46a0f615b9037284203bb9ceb0720a69596e4560e86e0ca9a7e7</guid>
+      <dc:date>2019-03-11T13:25:21Z</dc:date>
+    </item>
+    <item>
+      <title>F29-LXQT-x86_64-20190311-Live.iso</title>
+      <link>http://mirrors.rit.edu/fedora/alt/live-respins/F29-LXQT-x86_64-20190311-Live.torrent</link>
+      <description>Name: F29-LXQT-x86_64-20190311-Live.iso; Repo: fedora; Total size: 1546649600; File count: 1; Comment: ISO SHA512SUM: 7f48f899f5be52256338e7da16b4d9883ebeef7d70c5d53444fbf5a19b454549494b982492b67083e454e4e967f0202a884b12cd9d3d639579e479965eb64b1b  F29-LXQT-x86_64-20190311-Live.iso</description>
+      <author>fedora</author>
+      <pubDate>Mon, 11 Mar 2019 13:23:56 -0000</pubDate>
+      <guid isPermaLink="false">a7953d7961a2d3013c1ae96700ea9da9f2e310217f0c52a0f1de28594f74e063</guid>
+      <dc:date>2019-03-11T13:23:56Z</dc:date>
+    </item>
+    <item>
+      <title>F29-XFCE-x86_64-20190311-Live.iso</title>
+      <link>http://mirrors.rit.edu/fedora/alt/live-respins/F29-XFCE-x86_64-20190311-Live.torrent</link>
+      <description>Name: F29-XFCE-x86_64-20190311-Live.iso; Repo: fedora; Total size: 1530920960; File count: 1; Comment: ISO SHA512SUM: 0d920c05d4c529cfaab34dee9caa560753bdf7f34ddc25bf97d814ef5c3499f9f2ffcf38971e9326b3c9bb3c3ac5eb648446a519879fdc5a5662db5a69bd8509  F29-XFCE-x86_64-20190311-Live.iso</description>
+      <author>fedora</author>
+      <pubDate>Mon, 11 Mar 2019 13:23:48 -0000</pubDate>
+      <guid isPermaLink="false">587169b8978d0eaa792ebbc28bd2bd524bc795874a70508fcddad2a98ed8cfb8</guid>
+      <dc:date>2019-03-11T13:23:48Z</dc:date>
+    </item>
+    <item>
+      <title>Ubuntu CD cdimage.ubuntu.com</title>
+      <link>http://mirrors.rit.edu/ubuntu-cdimage/releases/trusty/release/ubuntu-14.04.6-desktop-amd64+mac.iso.torrent</link>
+      <description>Name: ubuntu-14.04.6-desktop-amd64+mac.iso; Repo: ubuntu-cdimage; Total size: 1156497408; File count: 1; Comment: Ubuntu CD cdimage.ubuntu.com</description>
+      <author>ubuntu-cdimage</author>
+      <pubDate>Thu, 07 Mar 2019 14:48:37 -0000</pubDate>
+      <guid isPermaLink="false">ccf1864f93abd5124f60fa5aaca831078dbaad7eee7892dc42a0c83122c4e839</guid>
+      <dc:date>2019-03-07T14:48:37Z</dc:date>
+    </item>
+    <item>
+      <title>Ubuntu CD releases.ubuntu.com</title>
+      <link>http://mirrors.rit.edu/ubuntu-releases/trusty/ubuntu-14.04.6-desktop-i386.iso.torrent</link>
+      <description>Name: ubuntu-14.04.6-desktop-i386.iso; Repo: ubuntu-releases; Total size: 1170964480; File count: 1; Comment: Ubuntu CD releases.ubuntu.com</description>
+      <author>ubuntu-releases</author>
+      <pubDate>Thu, 07 Mar 2019 14:47:29 -0000</pubDate>
+      <guid isPermaLink="false">9ab500fe604714f6b903229c971cabefd1e7131881d667e54f658d4e931af7e9</guid>
+      <dc:date>2019-03-07T14:47:29Z</dc:date>
+    </item>
+    <item>
+      <title>Ubuntu CD releases.ubuntu.com</title>
+      <link>http://mirrors.rit.edu/ubuntu-releases/trusty/ubuntu-14.04.6-desktop-amd64.iso.torrent</link>
+      <description>Name: ubuntu-14.04.6-desktop-amd64.iso; Repo: ubuntu-releases; Total size: 1157627904; File count: 1; Comment: Ubuntu CD releases.ubuntu.com</description>
+      <author>ubuntu-releases</author>
+      <pubDate>Thu, 07 Mar 2019 14:47:04 -0000</pubDate>
+      <guid isPermaLink="false">7791e96dc155d4c7930223c577be2eb5e5ce8f7116efea2d657dfb57f336fd20</guid>
+      <dc:date>2019-03-07T14:47:04Z</dc:date>
+    </item>
+    <item>
+      <title>Ubuntu CD cdimage.ubuntu.com</title>
+      <link>http://mirrors.rit.edu/ubuntu-cdimage/releases/trusty/release/ubuntu-14.04.6-server-ppc64el.iso.torrent</link>
+      <description>Name: ubuntu-14.04.6-server-ppc64el.iso; Repo: ubuntu-cdimage; Total size: 600401920; File count: 1; Comment: Ubuntu CD cdimage.ubuntu.com</description>
+      <author>ubuntu-cdimage</author>
+      <pubDate>Thu, 07 Mar 2019 14:45:15 -0000</pubDate>
+      <guid isPermaLink="false">0e757c7dee45c28d795d3ff0abbd2f9e4fc02d1c445430e2aa3a81f5da00ad42</guid>
+      <dc:date>2019-03-07T14:45:15Z</dc:date>
+    </item>
+    <item>
+      <title>Ubuntu CD cdimage.ubuntu.com</title>
+      <link>http://mirrors.rit.edu/ubuntu-cdimage/releases/trusty/release/ubuntu-14.04.6-server-powerpc.iso.torrent</link>
+      <description>Name: ubuntu-14.04.6-server-powerpc.iso; Repo: ubuntu-cdimage; Total size: 700784640; File count: 1; Comment: Ubuntu CD cdimage.ubuntu.com</description>
+      <author>ubuntu-cdimage</author>
+      <pubDate>Thu, 07 Mar 2019 14:45:03 -0000</pubDate>
+      <guid isPermaLink="false">9ca08ec6b6c867da36be89b795cf36fcbd79935c973b5d9b5f98aac906b36b85</guid>
+      <dc:date>2019-03-07T14:45:03Z</dc:date>
+    </item>
+    <item>
+      <title>Ubuntu CD cdimage.ubuntu.com</title>
+      <link>http://mirrors.rit.edu/ubuntu-cdimage/releases/trusty/release/ubuntu-14.04.6-server-amd64+mac.iso.torrent</link>
+      <description>Name: ubuntu-14.04.6-server-amd64+mac.iso; Repo: ubuntu-cdimage; Total size: 664797184; File count: 1; Comment: Ubuntu CD cdimage.ubuntu.com</description>
+      <author>ubuntu-cdimage</author>
+      <pubDate>Thu, 07 Mar 2019 14:44:47 -0000</pubDate>
+      <guid isPermaLink="false">4283ad8dff8457f699d0b703b30057f10947e056f5f6f0c8b335a404dbace02f</guid>
+      <dc:date>2019-03-07T14:44:47Z</dc:date>
+    </item>
+    <item>
+      <title>Ubuntu CD releases.ubuntu.com</title>
+      <link>http://mirrors.rit.edu/ubuntu-releases/trusty/ubuntu-14.04.6-server-i386.iso.torrent</link>
+      <description>Name: ubuntu-14.04.6-server-i386.iso; Repo: ubuntu-releases; Total size: 638582784; File count: 1; Comment: Ubuntu CD releases.ubuntu.com</description>
+      <author>ubuntu-releases</author>
+      <pubDate>Thu, 07 Mar 2019 14:44:07 -0000</pubDate>
+      <guid isPermaLink="false">ad30394ced8f1197f993580853797c60dc9a890bb5724211f4de917f49a9e1fa</guid>
+      <dc:date>2019-03-07T14:44:07Z</dc:date>
+    </item>
+    <item>
+      <title>Ubuntu CD releases.ubuntu.com</title>
+      <link>http://mirrors.rit.edu/ubuntu-releases/trusty/ubuntu-14.04.6-server-amd64.iso.torrent</link>
+      <description>Name: ubuntu-14.04.6-server-amd64.iso; Repo: ubuntu-releases; Total size: 662700032; File count: 1; Comment: Ubuntu CD releases.ubuntu.com</description>
+      <author>ubuntu-releases</author>
+      <pubDate>Thu, 07 Mar 2019 14:43:53 -0000</pubDate>
+      <guid isPermaLink="false">149a579a3312e9180a139e6e2eba3772271cba982bb0a9992e36fcf77ace635e</guid>
+      <dc:date>2019-03-07T14:43:53Z</dc:date>
+    </item>
+    <item>
+      <title>Arch Linux 2019.03.01 (www.archlinux.org)</title>
+      <link>http://mirrors.rit.edu/archlinux/iso/2019.03.01/archlinux-2019.03.01-x86_64.iso.torrent</link>
+      <description>Name: archlinux-2019.03.01-x86_64.iso; Repo: archlinux; Total size: 631242752; File count: 1; Comment: Arch Linux 2019.03.01 (www.archlinux.org)</description>
+      <author>archlinux</author>
+      <pubDate>Fri, 01 Mar 2019 15:57:57 -0000</pubDate>
+      <guid isPermaLink="false">2445122b4970365f63462f8af6360cfe624fb6b67fe07f3a3a29bc6886ac5ce7</guid>
+      <dc:date>2019-03-01T15:57:57Z</dc:date>
+    </item>
+    <item>
+      <title>Ubuntu CD releases.ubuntu.com</title>
+      <link>http://mirrors.rit.edu/ubuntu-releases/xenial/ubuntu-16.04.6-desktop-amd64.iso.torrent</link>
+      <description>Name: ubuntu-16.04.6-desktop-amd64.iso; Repo: ubuntu-releases; Total size: 1664614400; File count: 1; Comment: Ubuntu CD releases.ubuntu.com</description>
+      <author>ubuntu-releases</author>
+      <pubDate>Thu, 28 Feb 2019 16:53:22 -0000</pubDate>
+      <guid isPermaLink="false">73114465947db38ef5555727aff56e4a23536e313c8e92093727482cba4d9fc9</guid>
+      <dc:date>2019-02-28T16:53:22Z</dc:date>
+    </item>
+    <item>
+      <title>Ubuntu CD releases.ubuntu.com</title>
+      <link>http://mirrors.rit.edu/ubuntu-releases/xenial/ubuntu-16.04.6-desktop-i386.iso.torrent</link>
+      <description>Name: ubuntu-16.04.6-desktop-i386.iso; Repo: ubuntu-releases; Total size: 1677721600; File count: 1; Comment: Ubuntu CD releases.ubuntu.com</description>
+      <author>ubuntu-releases</author>
+      <pubDate>Thu, 28 Feb 2019 16:52:41 -0000</pubDate>
+      <guid isPermaLink="false">e997784b681cd28877b57686edeeeebc3480d23fae42d0e43be0d03ae3741969</guid>
+      <dc:date>2019-02-28T16:52:41Z</dc:date>
+    </item>
+    <item>
+      <title>Ubuntu CD cdimage.ubuntu.com</title>
+      <link>http://mirrors.rit.edu/ubuntu-cdimage/releases/xenial/release/ubuntu-16.04.6-server-s390x.iso.torrent</link>
+      <description>Name: ubuntu-16.04.6-server-s390x.iso; Repo: ubuntu-cdimage; Total size: 664330240; File count: 1; Comment: Ubuntu CD cdimage.ubuntu.com</description>
+      <author>ubuntu-cdimage</author>
+      <pubDate>Thu, 28 Feb 2019 16:02:42 -0000</pubDate>
+      <guid isPermaLink="false">9100dc9c8024c7017a345237150bbd65c3bfda3c555bf23c6caa674c6e51a371</guid>
+      <dc:date>2019-02-28T16:02:42Z</dc:date>
+    </item>
+    <item>
+      <title>Ubuntu CD cdimage.ubuntu.com</title>
+      <link>http://mirrors.rit.edu/ubuntu-cdimage/releases/xenial/release/ubuntu-16.04.6-server-ppc64el.iso.torrent</link>
+      <description>Name: ubuntu-16.04.6-server-ppc64el.iso; Repo: ubuntu-cdimage; Total size: 968978432; File count: 1; Comment: Ubuntu CD cdimage.ubuntu.com</description>
+      <author>ubuntu-cdimage</author>
+      <pubDate>Thu, 28 Feb 2019 16:02:25 -0000</pubDate>
+      <guid isPermaLink="false">6dc6381c7ddb47598aefb3c4b118042be01130b96c34008631e4ccc1fd1ad024</guid>
+      <dc:date>2019-02-28T16:02:25Z</dc:date>
+    </item>
+    <item>
+      <title>Ubuntu CD cdimage.ubuntu.com</title>
+      <link>http://mirrors.rit.edu/ubuntu-cdimage/releases/xenial/release/ubuntu-16.04.6-server-powerpc.iso.torrent<
