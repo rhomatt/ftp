@@ -251,13 +251,25 @@ namespace FtpClient {
 			int code = -1;
 			string lastLine;
 			int bytesRead = 0;
+			bool unfinished = false;
 
 			do {
 				byte[] buffer = new byte[256];
 				bytesRead = stream.Read(buffer, 0, buffer.Length);
 
 				string line = Encoding.ASCII.GetString(buffer);
-				Int32.TryParse(line.Split(' ')[0], out code);
+				Regex grepCode = new Regex(@"^\d+");
+				code = Int32.Parse(grepCode.Match(line).Value);
+
+				/*
+				 * It looks like anything that has a dash after the code indicates that there is more
+				 * data to be sent.
+				 *
+				 * Thankfully, this means I don't have to do a Thread.Sleep, which is almost what I did
+				 * Also I discovered this more or less by complete accident
+				 */
+				Regex checkUnfinished = new Regex(@"^\d+-");
+				unfinished = checkUnfinished.IsMatch(line);
 
 				lastLine = line;
 				Console.Write(line);
@@ -269,11 +281,9 @@ namespace FtpClient {
 				 *
 				 * This fixed it. I hope you can forgive me.
 				 *
-				 * TODO it looks like anything that has a dash after the code indicates that there is more
-				 * data to be sent.
 				 */
 				//Thread.Sleep(10);
-			} while (stream.DataAvailable && bytesRead > 0);
+			} while (stream.DataAvailable && bytesRead > 0 || unfinished);
 
 			return (code, lastLine);
 		}
