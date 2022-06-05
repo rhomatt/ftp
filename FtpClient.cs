@@ -9,14 +9,16 @@ using System.Threading;
 namespace FtpClient {
 	class Client {
 
-		TcpClient connection;
-		NetworkStream stream;
-		bool isPassive = false; // false: active, true: passive
-		bool debug = false;
-		IPAddress address;
-		string prompt = "ftp> ";
+		private TcpClient connection;
+		private NetworkStream stream;
+		private bool isPassive = false; // false: active, true: passive
+		private bool debug = false;
+		private IPAddress address;
+		private string prompt = "ftp> ";
+		private int dataPort;
 
-		public Client(string address, int port) {
+		public Client(string address, int port, int dataPort) {
+			this.dataPort = dataPort;
 			IPHostEntry hostEntries = Dns.GetHostEntry(address);
 			foreach(IPAddress curraddr in hostEntries.AddressList)
 				if(curraddr.AddressFamily.ToString() == ProtocolFamily.InterNetwork.ToString())
@@ -171,12 +173,11 @@ namespace FtpClient {
 				Console.WriteLine(line);
 		}
 
-		// returns local ipv4 address if usev6 is false. else returns local ipv6 address
-		private IPAddress getLocalIP(bool usev6) {
+		// returns local ipv4 address
+		private IPAddress GetLocalIP() {
 			IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
 			foreach (IPAddress address in host.AddressList) {
-				ProtocolFamily ipType = usev6 ? 
-					ProtocolFamily.InterNetworkV6 : ProtocolFamily.InterNetwork;
+				ProtocolFamily ipType = ProtocolFamily.InterNetwork;
 
 				if(address.AddressFamily.ToString() == ipType.ToString())
 					return address;
@@ -191,7 +192,7 @@ namespace FtpClient {
 		 * return the listener that will accept the conection from the FTP server
 		 */
 		private TcpListener port() {
-			IPAddress localIP = this.getLocalIP(false);
+			IPAddress localIP = this.GetLocalIP();
 			Console.WriteLine(localIP.ToString());
 
 			string arg = localIP.ToString().Replace('.', ',');
@@ -367,15 +368,18 @@ namespace FtpClient {
 
 		public static void Main(string[] args) {
 			if(args.Length < 1) {
-				Console.WriteLine("usage: ftp target");
+				Console.WriteLine("usage: ftp target [ftp_port ftp_data_port]");
 				return;
 			}
 
 			string address = args[0];
 			// Look for an arg from the user. Otherwise connect on the default port, 21
 			int port = args.Length > 1 ? Int32.Parse(args[1]) : 21;
+			// data port is 20 by default. my server cannot listen for connections on port 20
+			// unless run as root, so it will use port 2020 by default
+			int dataPort = args.Length > 2 ? Int32.Parse(args[2]) : 20;
 
-			Client client = new Client(address, port);
+			Client client = new Client(address, port, dataPort);
 
 			client.Run();
 		}
