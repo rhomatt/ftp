@@ -8,12 +8,19 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace FtpServer {
+	enum SendData {
+		NotReady, Active, Passive
+	}
+
 	class Server {
 		public static TcpListener server = new TcpListener(IPAddress.Any, 2121);
 		private TcpClient client;
 		private StreamReader fromClient;
 		private StreamWriter toClient;
-		private bool passive = false;
+
+		// This will get marked when a PORT or PASV command is sent from the client
+		// 1 indicates 
+		private SendData sendData = SendData.NotReady;
 
 		public Server() {
 			this.client = server.AcceptTcpClient();
@@ -69,15 +76,11 @@ namespace FtpServer {
 			TcpListener dataListener = null;
 
 			try {
-				if(this.passive) {
-					IPAddress clientAddress = ((IPEndPoint) this.client.Client.LocalEndPoint).Address;
-					dataListener = new TcpListener(clientAddress, 0);
-					dataListener.Start();
-					// why the TcpClient capitalizes point and the TcpListener doesn't, I will never understand...
-					int port = ((IPEndPoint) dataListener.LocalEndpoint).Port;
-				} else {
-
-				}
+				IPAddress clientAddress = ((IPEndPoint) this.client.Client.LocalEndPoint).Address;
+				dataListener = new TcpListener(clientAddress, 0);
+				dataListener.Start();
+				// why the TcpClient capitalizes point and the TcpListener doesn't, I will never understand...
+				int port = ((IPEndPoint) dataListener.LocalEndpoint).Port;
 			} catch (Exception) {
 			} finally {
 				if(dataConnection != null)
