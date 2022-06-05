@@ -56,23 +56,21 @@ namespace FtpServer {
 			return this.authenticated;
 		}
 
-		// returns local ipv4 address
-		private IPAddress GetLocalIP() {
-			IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
-			foreach (IPAddress address in host.AddressList) {
-				ProtocolFamily ipType = ProtocolFamily.InterNetwork;
+		// a valid ipv4 address + port must be given
+		private void CreateActiveConnectionEndpoint(string endpoint) {
+			string[] parts = endpoint.Split(',');
+			int p1 = Int32.Parse(parts[4]);
+			int p2 = Int32.Parse(parts[5]);
 
-				if(address.AddressFamily.ToString() == ipType.ToString())
-					return address;
-			}
-
-			return null;
+			IPAddress clientAddress = IPAddress.Parse(parts[0] + '.' + parts[1] + '.' + parts[2] + '.' + parts[3]);
+			this.sendData = SendData.Active;
+			this.dataLink = new IPEndPoint(clientAddress, p1*256 + p2);
+			this.WriteToClient(200, " PORT command successful.");
 		}
 
-		// only to be called in passive mode
 		// sets dataLink to be a TcpListener to prepare for the incoming TCP connection
 		private void SendIPEndpoint() {
-			IPAddress clientAddress = ((IPEndPoint) this.client.Client.LocalEndPoint).Address;
+			IPAddress clientAddress = ((IPEndPoint) this.client.Client.RemoteEndPoint).Address;
 			Console.WriteLine("Creating a listener for {0}", clientAddress.ToString());
 			TcpListener dataListener = new TcpListener(clientAddress, 0);
 			dataListener.Start();
@@ -81,12 +79,11 @@ namespace FtpServer {
 			int p1 = port / 256;
 			int p2 = port - p1 * 256;
 
-			int code = 227;
 			StringBuilder data = new StringBuilder();
 			data.Append(" Entering Passive Mode (");
-			data.Append(this.GetLocalIP().ToString().Replace('.', ','));
+			data.Append(clientAddress.ToString().Replace('.', ','));
 			data.AppendFormat(",{0},{1})", p1, p2);
-			this.WriteToClient(code, data.ToString());
+			this.WriteToClient(227, data.ToString());
 
 			this.sendData = SendData.Passive;
 			this.dataLink = dataListener;
@@ -121,6 +118,10 @@ namespace FtpServer {
 				SendClientData(dataConnection, Encoding.ASCII.GetBytes(file));
 			}
 			dataConnection.Close();
+			if(this.sendData == SendData.Passive)
+				((TcpListener) this.dataLink).Stop();
+
+			this.sendData = SendData.NotReady;
 			this.WriteToClient(226, " Directory send OK.");
 		}
 
@@ -141,13 +142,15 @@ namespace FtpServer {
 						break;
 					case "LIST":
 						this.List();
-						this.sendData = SendData.NotReady;
 						break;
 					case "RETR":
 						target = args[1];
 						break;
 					case "PASV":
 						this.SendIPEndpoint();
+						break;
+					case "PORT":
+						this.CreateActiveConnectionEndpoint(args[1]);
 						break;
 					case "PWD":
 						string cwd = String.Format(" {0}", this.cwd);
@@ -179,11 +182,13 @@ namespace FtpServer {
 		} 
 
 		public void Run(){
+			EndPoint clientAddress = this.client.Client.RemoteEndPoint;
 			foreach(string line in this.welcomeMessage)
 				this.WriteToClient(220, line);
 			while(ParseCmd(this.fromClient.ReadLine()));
 
 			this.client.Close();
+			Console.WriteLine("Session with {0} stopped", clientAddress.ToString());
 		}
 
 		public static void Main(string[] args) {
