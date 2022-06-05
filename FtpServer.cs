@@ -29,6 +29,7 @@ namespace FtpServer {
 		// This will get marked when a PORT or PASV command is sent from the client
 		// 1 indicates 
 		private SendData sendData = SendData.NotReady;
+
 		// Either a IPEndPoint, or TcpListener, depending on if we are expecting active or passive mode
 		private Object dataLink;
 
@@ -36,6 +37,13 @@ namespace FtpServer {
 			this.client = server.AcceptTcpClient();
 			this.fromClient = new StreamReader(this.client.GetStream());
 			this.toClient = new StreamWriter(this.client.GetStream());
+		}
+
+		private void ResetSendData() {
+			if(this.dataLink is TcpListener)
+				((TcpListener) this.dataLink).Stop();
+
+			this.sendData = SendData.NotReady;
 		}
 
 		private void WriteToClient(int code, string message) {
@@ -118,11 +126,35 @@ namespace FtpServer {
 				SendClientData(dataConnection, Encoding.ASCII.GetBytes(file));
 			}
 			dataConnection.Close();
-			if(this.sendData == SendData.Passive)
-				((TcpListener) this.dataLink).Stop();
-
-			this.sendData = SendData.NotReady;
+			this.ResetSendData();
 			this.WriteToClient(226, " Directory send OK.");
+		}
+
+		private void Retrieve(string fileName) {
+			if(this.sendData == SendData.NotReady) {
+				this.WriteToClient(425, " Use PORT or PASV first");
+				return;
+			}
+
+			// please don't download anything that won't fit into RAM
+			byte[] bytes = File.ReadAllBytes(fileName);
+
+			string message = 
+				String.Format(" Opening BINARY mode data connection for {0} ({1} bytes).", fileName, bytes.Length);
+			this.WriteToClient(150, message);
+			TcpClient dataConnection;
+
+			if(this.sendData == SendData.Passive)
+				dataConnection = ((TcpListener) this.dataLink).AcceptTcpClient();
+			else {
+				dataConnection = new TcpClient();
+				dataConnection.Connect((IPEndPoint) this.dataLink);
+			}
+
+			dataConnection.GetStream().Write(bytes);
+			dataConnection.Close();
+			this.ResetSendData();
+			this.WriteToClient(226, " Transfer complete.");
 		}
 
 		private bool ParseCmd(string line) {
@@ -133,7 +165,6 @@ namespace FtpServer {
 
 			string[] args = line.Trim().Split(' ', 2);
 			string cmd = args[0];
-			string target;
 
 			try {
 				switch(cmd) {
@@ -144,7 +175,7 @@ namespace FtpServer {
 						this.List();
 						break;
 					case "RETR":
-						target = args[1];
+						this.Retrieve(args[1]);
 						break;
 					case "PASV":
 						this.SendIPEndpoint();
