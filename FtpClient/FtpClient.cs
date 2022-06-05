@@ -1,4 +1,10 @@
-﻿using System;
+﻿/*
+ * Author: Matthew Rho
+ * Class: data comm and networks
+ * Professor: Jeremy Brown
+ * Desc: Minimal FTP client implementation
+ */
+using System;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -8,18 +14,20 @@ using System.Threading;
 
 namespace FtpClient {
 	class Client {
-
 		private TcpClient connection;
 		private NetworkStream stream;
 		private bool isPassive = false; // false: active, true: passive
 		private bool debug = false;
 		private string prompt = "ftp> ";
-		private int dataPort;
 
-		public Client(string address, int port, int dataPort) {
-			this.dataPort = dataPort;
+		private static readonly int ERROR_LEVEL = 400;
+
+		public Client(string address, int port) {
 			IPHostEntry hostEntries = Dns.GetHostEntry(address);
+
+			// there may be multiple addresses to try
 			foreach(IPAddress curraddr in hostEntries.AddressList)
+				// only connect via ipv4
 				if(curraddr.AddressFamily.ToString() == ProtocolFamily.InterNetwork.ToString()) {
 					try {
 						this.connection = new TcpClient();
@@ -29,12 +37,16 @@ namespace FtpClient {
 						this.stream = this.connection.GetStream();
 
 						this.Read(this.stream); // read the initial help message
+						Console.Write("Name ({0}:{1}): ", address, Environment.UserName);
+						this.Login();
 						return;
 					} catch (Exception e) {
 						Console.Error.WriteLine("Could not connect to {0}.", curraddr.ToString());
 						Console.Error.WriteLine(e.Message);
 					}
 				}
+
+			throw new Exception("Could establish a connection to " + address);
 		}
 
 		/*
@@ -77,7 +89,7 @@ namespace FtpClient {
 
 				int code;
 				(code, _) = FTPCmd("LIST", target);
-				if(code >= 400)
+				if(code >= ERROR_LEVEL)
 					throw new Exception("Could not list");
 				if(!this.isPassive)
 					dataConnection = listener.AcceptTcpClient();
@@ -111,7 +123,7 @@ namespace FtpClient {
 				int code;
 				string line;
 				(code, line) = FTPCmd("RETR", target);
-				if(code >= 400)
+				if(code >= ERROR_LEVEL)
 					throw new Exception("Could not get");
 				Regex bytesToReadRegex = new Regex(@"\d+ bytes");
 				int bytesToRead = Int32.Parse(bytesToReadRegex.Match(line).Value.Split(' ')[0]);
@@ -211,7 +223,7 @@ namespace FtpClient {
 
 			int code;
 			(code, _) = FTPCmd("PORT", arg);
-			if(code >= 400) {
+			if(code >= ERROR_LEVEL) {
 				listener.Stop();
 				throw new Exception("Port command failed");
 			}
@@ -231,7 +243,7 @@ namespace FtpClient {
 			string target = Encoding.ASCII.GetString(buffer);
 			Console.WriteLine(target);
 			int code = Int32.Parse(target.Split(' ')[0]);
-			if(code >= 400)
+			if(code >= ERROR_LEVEL)
 				throw new Exception("An error occured when trying to send the PASV command");
 			Regex ipPattern = new Regex(@"\d+,\d+,\d+,\d+,\d+,\d+");
 			target = ipPattern.Match(target).Value;
@@ -310,20 +322,22 @@ namespace FtpClient {
 				switch(cmd) {
 					case "a":
 					case "ascii":
-						FTPCmd("TYPE", "A");
+						this.FTPCmd("TYPE", "A");
 						break;
 					case "b":
 					case "binary":
-						FTPCmd("TYPE", "I");
+						this.FTPCmd("TYPE", "I");
 						break;
 					case "cd":
 						target = args[1];
-						FTPCmd("CWD", target);
+						this.FTPCmd("CWD", target);
 						break;
 					case "cdup":
-						FTPCmd("CDUP");
+						this.FTPCmd("CDUP");
 						break;
 					case "debug":
+						this.debug = !this.debug;
+						Console.WriteLine("Debug mode is {0}", this.debug ? "on" : "off");
 						break;
 					case "ls":
 					case "dir":
@@ -344,29 +358,41 @@ namespace FtpClient {
 						Console.WriteLine("Passive mode is {0}", this.isPassive ? "on" : "off");
 						break;
 					case "pwd":
-						FTPCmd("PWD");
+						this.FTPCmd("PWD");
 						break;
 					case "q":
 					case "quit":
 					case "logout":
-						FTPCmd("QUIT");
+						this.FTPCmd("QUIT");
 						return false;
 					case "user":
 					case "login":
-						FTPCmd("USER", args[1]);
-						string password = Console.ReadLine();
-						FTPCmd("PASS", password);
+						this.Login();
 						break;
 					default:
 						Console.Error.WriteLine("Invalid command");
 						return true;
 				}
 			} catch (Exception e) {
-				Console.Error.WriteLine(e.Message);
 				Console.Error.WriteLine("Invalid use of {0}", cmd);
+				Console.Error.WriteLine(e.Message);
 			}
 
 			return true;
+		}
+
+		private void PromptInitialLogin(string address) {
+		}
+
+		private void Login() {
+			string user = Console.ReadLine();
+			int code;
+			(code, _) = this.FTPCmd("USER", user);
+			if(code >= ERROR_LEVEL)
+				return;
+
+			string password = Console.ReadLine();
+			this.FTPCmd("PASS", password);
 		}
 
 		/*
@@ -391,11 +417,8 @@ namespace FtpClient {
 			string address = args[0];
 			// Look for an arg from the user. Otherwise connect on the default port, 21
 			int port = args.Length > 1 ? Int32.Parse(args[1]) : 21;
-			// data port is 20 by default. my server cannot listen for connections on port 20
-			// unless run as root, so it will use port 2020 by default
-			int dataPort = args.Length > 2 ? Int32.Parse(args[2]) : 20;
 
-			Client client = new Client(address, port, dataPort);
+			Client client = new Client(address, port);
 
 			client.Run();
 		}
