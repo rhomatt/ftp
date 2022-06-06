@@ -1,3 +1,9 @@
+/*
+ * Author: Matthew Rho
+ * Class: data comm and networks
+ * Professor: Jeremy Brown
+ * Desc: Minimal FTP server implementation
+ */
 using System;
 using System.IO;
 using System.Net;
