@@ -12,6 +12,20 @@ namespace FtpServer {
 		NotReady, Active, Passive
 	}
 
+	class FTPCode {
+		public static int DataPrep = 150;
+		public static int Success = 200;
+		public static int Welcome = 220;
+		public static int Goodbye = 221;
+		public static int DataDone = 226;
+		public static int Passive = 227;
+		public static int LoginSuccess = 230;
+		public static int Password = 331;
+		public static int DataPrepFail = 425;
+		public static int NotImplemented = 502;
+		public static int LoginFail = 530;
+	}
+
 	class Server {
 		private static TcpListener server = new TcpListener(IPAddress.Any, 2121);
 		private TcpClient client;
@@ -73,7 +87,7 @@ namespace FtpServer {
 			IPAddress clientAddress = IPAddress.Parse(parts[0] + '.' + parts[1] + '.' + parts[2] + '.' + parts[3]);
 			this.sendData = SendData.Active;
 			this.dataLink = new IPEndPoint(clientAddress, p1*256 + p2);
-			this.WriteToClient(200, " PORT command successful.");
+			this.WriteToClient(FTPCode.Success, " PORT command successful.");
 		}
 
 		// sets dataLink to be a TcpListener to prepare for the incoming TCP connection
@@ -91,7 +105,7 @@ namespace FtpServer {
 			data.Append(" Entering Passive Mode (");
 			data.Append(clientAddress.ToString().Replace('.', ','));
 			data.AppendFormat(",{0},{1})", p1, p2);
-			this.WriteToClient(227, data.ToString());
+			this.WriteToClient(FTPCode.Passive, data.ToString());
 
 			this.sendData = SendData.Passive;
 			this.dataLink = dataListener;
@@ -107,10 +121,10 @@ namespace FtpServer {
 
 		private void List() {
 			if(this.sendData == SendData.NotReady) {
-				this.WriteToClient(425, " Use PORT or PASV first");
+				this.WriteToClient(FTPCode.DataPrepFail, " Use PORT or PASV first");
 				return;
 			}
-			this.WriteToClient(150, " Here comes the directory listing.");
+			this.WriteToClient(FTPCode.DataPrep, " Here comes the directory listing.");
 			TcpClient dataConnection;
 
 			if(this.sendData == SendData.Passive)
@@ -127,12 +141,12 @@ namespace FtpServer {
 			}
 			dataConnection.Close();
 			this.ResetSendData();
-			this.WriteToClient(226, " Directory send OK.");
+			this.WriteToClient(FTPCode.DataDone, " Directory send OK.");
 		}
 
 		private void Retrieve(string fileName) {
 			if(this.sendData == SendData.NotReady) {
-				this.WriteToClient(425, " Use PORT or PASV first");
+				this.WriteToClient(FTPCode.DataPrepFail, " Use PORT or PASV first");
 				return;
 			}
 
@@ -141,7 +155,7 @@ namespace FtpServer {
 
 			string message = 
 				String.Format(" Opening BINARY mode data connection for {0} ({1} bytes).", fileName, bytes.Length);
-			this.WriteToClient(150, message);
+			this.WriteToClient(FTPCode.DataPrep, message);
 			TcpClient dataConnection;
 
 			if(this.sendData == SendData.Passive)
@@ -154,9 +168,14 @@ namespace FtpServer {
 			dataConnection.GetStream().Write(bytes);
 			dataConnection.Close();
 			this.ResetSendData();
-			this.WriteToClient(226, " Transfer complete.");
+			this.WriteToClient(FTPCode.DataDone, " Transfer complete.");
 		}
 
+		/*
+		 * Parses a command from the client and performs some relevent logic
+		 *
+		 * return false if quitting, true otherwise
+		 */
 		private bool ParseCmd(string line) {
 			if(line.Length <= 0)
 				return true;
@@ -170,9 +189,9 @@ namespace FtpServer {
 				switch(cmd) {
 					case "TYPE":
 						if(args[1] != "I")
-							this.WriteToClient(502, " Sorry, only binary mode is supported.");
+							this.WriteToClient(FTPCode.NotImplemented, " Sorry, only binary mode is supported.");
 						else
-							this.WriteToClient(200, " Switching to Binary mode.");
+							this.WriteToClient(FTPCode.Success, " Switching to Binary mode.");
 						break;
 					case "LIST":
 						this.List();
@@ -188,23 +207,23 @@ namespace FtpServer {
 						break;
 					case "PWD":
 						string cwd = String.Format(" {0}", this.cwd);
-						this.WriteToClient(200, cwd);
+						this.WriteToClient(FTPCode.Success, cwd);
 						break;
 					case "QUIT":
-						WriteToClient(221, " Goodbye.");
+						WriteToClient(FTPCode.Goodbye, " Goodbye.");
 						return false;
 					case "USER":
 						this.user = args[1];
 						if(this.user == Server.anonymousUser)
-							this.WriteToClient(331, " Please specify the password");
+							this.WriteToClient(FTPCode.Password, " Please specify the password");
 						else
-							this.WriteToClient(530, " This FTP server is anonymous only.");
+							this.WriteToClient(FTPCode.LoginFail, " This FTP server is anonymous only.");
 						break;
 					case "PASS":
-						this.WriteToClient(230, " Login successful");
+						this.WriteToClient(FTPCode.LoginSuccess, " Login successful");
 						break;
 					default:
-						WriteToClient(200, " Unsupported command");
+						WriteToClient(FTPCode.Success, " Unsupported command");
 						return true;
 				}
 			} catch (Exception e) {
@@ -215,11 +234,14 @@ namespace FtpServer {
 			return true;
 		} 
 
+		/*
+		 * Main loop
+		 */
 		public void Run(){
 			EndPoint clientAddress = this.client.Client.RemoteEndPoint;
 			try {
 				foreach(string line in this.welcomeMessage)
-					this.WriteToClient(220, line);
+					this.WriteToClient(FTPCode.Welcome, line);
 				while(ParseCmd(this.fromClient.ReadLine()));
 			} catch (Exception e) {
 				Console.Error.WriteLine("Something bad happened while servicing the client");
