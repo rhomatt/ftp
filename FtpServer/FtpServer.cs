@@ -260,7 +260,7 @@ namespace FtpServer {
 						this.WriteToClient(FTPCode.LoginSuccess, " Login successful");
 						break;
 					default:
-						WriteToClient(FTPCode.Success, " Unsupported command");
+						this.WriteToClient(FTPCode.Success, " Unsupported command");
 						return true;
 				}
 			} catch (Exception e) {

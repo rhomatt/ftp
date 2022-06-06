@@ -94,7 +94,7 @@ namespace FtpClient {
 				}
 
 				int code;
-				code = FTPCmd("LIST", target);
+				code = this.FTPCmd("LIST", target);
 				if(code >= ERROR_LEVEL)
 					throw new Exception("Could not list");
 				if(!this.isPassive)
@@ -128,7 +128,7 @@ namespace FtpClient {
 					dataConnection.Connect(this.Passive());
 				}
 
-				int code = FTPCmd("RETR", target);
+				int code = this.FTPCmd("RETR", target);
 				if(code >= ERROR_LEVEL)
 					throw new Exception("Could not get");
 
