@@ -53,6 +53,9 @@ namespace FtpServer {
 			this.toClient = new StreamWriter(this.client.GetStream());
 		}
 
+		/*
+		 * Resets sendData, and stops the dataLink if it is a listener
+		 */
 		private void ResetSendData() {
 			if(this.dataLink is TcpListener)
 				((TcpListener) this.dataLink).Stop();
@@ -60,6 +63,9 @@ namespace FtpServer {
 			this.sendData = SendData.NotReady;
 		}
 
+		/*
+		 * Write a code, and a message to the client
+		 */
 		private void WriteToClient(int code, string message) {
 			StringBuilder sb = new StringBuilder();
 			sb.Append(code);
@@ -70,15 +76,26 @@ namespace FtpServer {
 			this.toClient.Flush();
 		}
 
+		/*
+		 * Accepts the anonymous user ftp when logging in
+		 *
+		 * return login success or not
+		 */
 		private bool Authenticate(string password) {
 			if(this.user == Server.anonymousUser)
 				this.authenticated = true;
+			else
+				this.authenticated = false;
 
 			//TODO maybe put logic here to support users
 			return this.authenticated;
 		}
 
-		// a valid ipv4 address + port must be given
+		/*
+		 * Parses a PORT command to
+		 * set dataLink to be an ipv4 endpoint that will
+		 * be used to establish a data connection
+		 */
 		private void CreateActiveConnectionEndpoint(string endpoint) {
 			string[] parts = endpoint.Split(',');
 			int p1 = Int32.Parse(parts[4]);
@@ -91,6 +108,11 @@ namespace FtpServer {
 		}
 
 		// sets dataLink to be a TcpListener to prepare for the incoming TCP connection
+		/*
+		 * Parses a PASV command to
+		 * set dataLink to be a TcpListener that will send it's ip and
+		 * port number to the client to establish a data connection
+		 */
 		private void SendIPEndpoint() {
 			IPAddress clientAddress = ((IPEndPoint) this.client.Client.RemoteEndPoint).Address;
 			Console.WriteLine("Creating a listener for {0}", clientAddress.ToString());
@@ -111,6 +133,9 @@ namespace FtpServer {
 			this.dataLink = dataListener;
 		}
 
+		/*
+		 * Send the client some data
+		 */
 		private void SendClientData(TcpClient dataConnection, byte[] data) {
 			try {
 				dataConnection.GetStream().Write(data);
@@ -119,6 +144,9 @@ namespace FtpServer {
 			}
 		}
 
+		/*
+		 * Lists the current working directory for the client
+		 */
 		private void List() {
 			if(this.sendData == SendData.NotReady) {
 				this.WriteToClient(FTPCode.DataPrepFail, " Use PORT or PASV first");
@@ -144,6 +172,9 @@ namespace FtpServer {
 			this.WriteToClient(FTPCode.DataDone, " Directory send OK.");
 		}
 
+		/*
+		 * Sends the client some specified file
+		 */
 		private void Retrieve(string fileName) {
 			if(this.sendData == SendData.NotReady) {
 				this.WriteToClient(FTPCode.DataPrepFail, " Use PORT or PASV first");
@@ -259,6 +290,7 @@ namespace FtpServer {
 
 			while(true) {
 				Server server = new Server();
+				// we should be able to service multiple clients
 				ThreadPool.QueueUserWorkItem((object _) => server.Run());
 			}
 		}
