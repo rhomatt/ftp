@@ -41,7 +41,7 @@ namespace FtpClient {
 
 						this.Read(this.stream); // read the initial help message
 						Console.Write("Name ({0}:{1}): ", address, Environment.UserName);
-						this.Login();
+						this.Login("");
 						return;
 					} catch (Exception e) {
 						Console.Error.WriteLine("Could not connect to {0}.", curraddr.ToString());
@@ -59,6 +59,9 @@ namespace FtpClient {
 		 */
 		private int FTPCmd(string cmd, params string[] args) {
 			StringBuilder sb = new StringBuilder();
+
+			if(this.debug)
+				Console.WriteLine("Executing a {0} FTP command", cmd);
 
 			sb.Append(cmd);
 			foreach(string arg in args) {
@@ -215,20 +218,23 @@ namespace FtpClient {
 		 */
 		private TcpListener Port() {
 			IPAddress localIP = this.GetLocalIP();
-			Console.WriteLine(localIP.ToString());
+			if(this.debug)
+				Console.WriteLine(localIP.ToString());
 
 			string arg = localIP.ToString().Replace('.', ',');
 			TcpListener listener = new TcpListener(IPAddress.Any, 0);
 			listener.Start();
 			int port = ((IPEndPoint)listener.LocalEndpoint).Port;
-			Console.WriteLine("port: {0}", port);
+			if(this.debug)
+				Console.WriteLine("port: {0}", port);
 			int p1 = port / 256;
 			int p2 = port - p1 * 256;
 
 			arg += ',' + p1.ToString();
 			arg += ',' + p2.ToString();
 
-			Console.WriteLine("sending PORT {0}", arg);
+			if(this.debug)
+				Console.WriteLine("sending PORT {0}", arg);
 
 			int code = FTPCmd("PORT", arg);
 			if(code >= ERROR_LEVEL) {
@@ -249,7 +255,8 @@ namespace FtpClient {
 			byte[] buffer = new byte[256];
 			this.stream.Read(buffer);
 			string target = Encoding.ASCII.GetString(buffer);
-			Console.WriteLine(target);
+			if(this.debug)
+				Console.WriteLine(target);
 			int code = Int32.Parse(target.Split(' ')[0]);
 			if(code >= ERROR_LEVEL)
 				throw new Exception("An error occured when trying to send the PASV command");
@@ -362,7 +369,7 @@ namespace FtpClient {
 						return false;
 					case "user":
 					case "login":
-						this.Login();
+						this.Login(args[1]);
 						break;
 					default:
 						Console.Error.WriteLine("Invalid command");
@@ -377,8 +384,9 @@ namespace FtpClient {
 		}
 
 		// login to remote server
-		private void Login() {
-			string user = Console.ReadLine();
+		private void Login(string user) {
+			if(user == "")
+				user = Console.ReadLine();
 			int code = this.FTPCmd("USER", user);
 			if(code >= ERROR_LEVEL)
 				return;
@@ -402,7 +410,7 @@ namespace FtpClient {
 
 		public static void Main(string[] args) {
 			if(args.Length < 1) {
-				Console.WriteLine("usage: ftp target [ftp_port]");
+				Console.WriteLine("usage: FTPClient.exe target [ftp_port]");
 				return;
 			}
 
