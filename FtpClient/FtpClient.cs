@@ -84,10 +84,10 @@ namespace FtpClient {
 
 			try {
 				if(!this.isPassive)
-					listener = port();
+					listener = this.Port();
 				else {
 					dataConnection = new TcpClient();
-					dataConnection.Connect(passive());
+					dataConnection.Connect(this.Passive());
 				}
 
 				int code;
@@ -113,16 +113,16 @@ namespace FtpClient {
 		/*
 		 * FTP RETR command. Downloads a file.
 		 */
-		private void get(string target) {
+		private void Get(string target) {
 			TcpListener listener = null;
 			TcpClient dataConnection = null;
 
 			try {
 				if(!this.isPassive)
-					listener = port();
+					listener = this.Port();
 				else {
 					dataConnection = new TcpClient();
-					dataConnection.Connect(passive());
+					dataConnection.Connect(this.Passive());
 				}
 
 				int code = FTPCmd("RETR", target);
@@ -208,7 +208,7 @@ namespace FtpClient {
 		 *
 		 * return the listener that will accept the conection from the FTP server
 		 */
-		private TcpListener port() {
+		private TcpListener Port() {
 			IPAddress localIP = this.GetLocalIP();
 			Console.WriteLine(localIP.ToString());
 
@@ -239,7 +239,7 @@ namespace FtpClient {
 		 *
 		 * return the IPEndPoint to connect to, given by the FTP server
 		 */
-		private IPEndPoint passive() {
+		private IPEndPoint Passive() {
 			this.stream.Write(Encoding.ASCII.GetBytes("PASV\r\n"));
 			byte[] buffer = new byte[256];
 			this.stream.Read(buffer);
@@ -332,16 +332,16 @@ namespace FtpClient {
 					case "ls":
 					case "dir":
 						target = args.Length == 1 ? "" : line.Split(' ', 2)[1];
-						List(target);
+						this.List(target);
 						break;
 					case "get":
 						target = args[1];
-						get(target);
+						this.Get(target);
 						break;
 					case "?":
 					case "h":
 					case "help":
-						PrintHelp();
+						this.PrintHelp();
 						return true;
 					case "passive":
 						this.isPassive = !this.isPassive;
