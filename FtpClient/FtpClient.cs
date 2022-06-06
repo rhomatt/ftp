@@ -172,6 +172,9 @@ namespace FtpClient {
 			}
 		}
 
+		/*
+		 * does what it says
+		 */
 		private void PrintHelp() {
 			string[] help_lines = {
 				"Help:",
@@ -197,8 +200,10 @@ namespace FtpClient {
 				Console.WriteLine(line);
 		}
 
-		// returns local ipv4 address
-		// Null if nothing found (which should never happen)
+		/*
+		 * returns local ipv4 address or
+		 * null if nothing found (which should never happen)
+		 */
 		private IPAddress GetLocalIP() {
 			IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
 			foreach (IPAddress address in host.AddressList) {
@@ -260,6 +265,8 @@ namespace FtpClient {
 			int code = Int32.Parse(target.Split(' ')[0]);
 			if(code >= ERROR_LEVEL)
 				throw new Exception("An error occured when trying to send the PASV command");
+
+			// we should get an ipv4 address plus the port in this form
 			Regex ipPattern = new Regex(@"\d+,\d+,\d+,\d+,\d+,\d+");
 			target = ipPattern.Match(target).Value;
 
@@ -296,6 +303,7 @@ namespace FtpClient {
 				 * data to be sent (at least this is how the GNU FTP client seems to be implemented).
 				 *
 				 * Thankfully, this means I don't have to do a Thread.Sleep, which is almost what I did
+				 * because the client wasn't properly reading the entire debian ftp welcome message.
 				 * Also I discovered this more or less by complete accident
 				 */
 				Regex checkUnfinished = new Regex(@"^\d+-");
@@ -383,7 +391,10 @@ namespace FtpClient {
 			return true;
 		}
 
-		// login to remote server
+		/*
+		 * login to remote server
+		 * ask for the user if the given user is a blank string
+		 */
 		private void Login(string user) {
 			if(user == "")
 				user = Console.ReadLine();
