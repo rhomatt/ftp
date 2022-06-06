@@ -133,6 +133,10 @@ namespace FtpClient {
 					dataConnection = listener.AcceptTcpClient();
 				NetworkStream stream = dataConnection.GetStream();
 
+				string dest = "copied";
+				Directory.CreateDirectory(dest);
+				if(Directory.GetCurrentDirectory() != dest)
+					Directory.SetCurrentDirectory(dest);
 				FileStream file = File.Open(target, System.IO.FileMode.Create);
 				int bytesRead = 0;
 
